@@ -1,0 +1,26 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 24px;
+  background-color: #f4f7fb;
+  color: #1f2937;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 16px;
+  color: #0f766e;
+}
+
+div {
+  min-height: 120px;
+  padding: 16px;
+  border: 2px solid #94a3b8;
+  background-color: #ffffff;
+}
+
+button {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background-color: #2563eb;
+  color: #ffffff;
+}

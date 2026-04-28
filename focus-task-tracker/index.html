@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Task Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="app">
+    <header class="app-header">
+      <p class="eyebrow">Mini Project</p>
+      <h1>Focus Task Tracker</h1>
+      <p class="intro">Add study tasks, complete them, delete them, and keep the summary accurate.</p>
+    </header>
+
+    <section class="task-panel" aria-label="Task creator">
+      <label for="task-input">New task</label>
+      <div class="input-row">
+        <input id="task-input" type="text" placeholder="Example: Practice addEventListener">
+        <button id="add-task-button" type="button" disabled>Add Task</button>
+      </div>
+      <p id="input-help" class="help-text">Type a task name to enable the button.</p>
+    </section>
+
+    <section class="summary-panel" aria-label="Task summary">
+      <div>
+        <span class="summary-label">Total</span>
+        <strong id="total-count">0</strong>
+      </div>
+      <div>
+        <span class="summary-label">Completed</span>
+        <strong id="completed-count">0</strong>
+      </div>
+      <div>
+        <span class="summary-label">Remaining</span>
+        <strong id="remaining-count">0</strong>
+      </div>
+    </section>
+
+    <section class="task-list-panel" aria-label="Task list">
+      <h2>Tasks</h2>
+      <p id="empty-message" class="empty-message">No tasks yet.</p>
+      <ul id="task-list" class="task-list"></ul>
+    </section>
+  </main>
+</body>
+</html>
