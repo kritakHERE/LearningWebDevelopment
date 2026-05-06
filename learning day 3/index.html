@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript Learning Day 3</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="app">
+    <header class="app-header">
+      <p class="eyebrow">Day 3</p>
+      <h1>Arrays, Objects, and Rendering State</h1>
+    </header>
+
+    <section class="summary-panel" aria-label="Topic summary">
+      <div>
+        <span class="summary-label">Total</span>
+        <strong id="total-count">0</strong>
+      </div>
+      <div>
+        <span class="summary-label">Completed</span>
+        <strong id="completed-count">0</strong>
+      </div>
+      <div>
+        <span class="summary-label">Remaining</span>
+        <strong id="remaining-count">0</strong>
+      </div>
+    </section>
+
+    <section class="control-panel" aria-label="Topic controls">
+      <div class="button-row">
+        <button id="render-button" type="button">Render Topics</button>
+        <button id="complete-first-button" type="button">Complete First</button>
+        <button id="remove-last-button" type="button">Remove Last</button>
+      </div>
+
+      <div class="button-row">
+        <button id="show-all-button" type="button">All</button>
+        <button id="show-completed-button" type="button">Completed</button>
+        <button id="show-remaining-button" type="button">Remaining</button>
+      </div>
+    </section>
+
+    <section class="topic-panel" aria-label="Topic list">
+      <div class="topic-heading">
+        <h2>Topics</h2>
+        <p id="filter-label">Showing all topics</p>
+      </div>
+
+      <p id="empty-message" class="empty-message">No topics to show.</p>
+      <ul id="topic-list" class="topic-list"></ul>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,174 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f7f9fc;
+  color: #182235;
+}
+
+.app {
+  width: min(860px, 100%);
+  margin: 0 auto;
+  padding: 32px 18px;
+}
+
+.app-header {
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #0f766e;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: 34px;
+}
+
+.summary-panel,
+.control-panel,
+.topic-panel {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+.summary-panel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.summary-panel div {
+  padding: 14px;
+  border-radius: 6px;
+  background-color: #edf7f5;
+}
+
+.summary-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #526070;
+  font-size: 14px;
+}
+
+.summary-panel strong {
+  font-size: 28px;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.button-row + .button-row {
+  margin-top: 10px;
+}
+
+button {
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 6px;
+  background-color: #2563eb;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}
+
+.topic-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+h2 {
+  margin-bottom: 12px;
+  font-size: 24px;
+}
+
+#filter-label,
+.empty-message {
+  color: #667085;
+}
+
+.topic-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.topic-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #d7dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+.topic-name {
+  overflow-wrap: anywhere;
+}
+
+.topic-status {
+  min-width: 96px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background-color: #fef3c7;
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.topic-item.completed .topic-name {
+  color: #667085;
+  text-decoration: line-through;
+}
+
+.topic-item.completed .topic-status {
+  background-color: #d1fae5;
+  color: #047857;
+}
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 29px;
+  }
+
+  .summary-panel,
+  .topic-item {
+    grid-template-columns: 1fr;
+  }
+
+  .topic-heading {
+    display: block;
+  }
+}

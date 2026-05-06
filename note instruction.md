@@ -27,6 +27,10 @@ Learning style and teaching direction:
 Current known progress:
 - Day 1 completed: JavaScript DOM basics.
 - Practiced selecting an element, creating an element, adding text with `textContent`, appending with `appendChild()`, setting an attribute with `setAttribute()`, and removing an element with `.remove()` inside a button click handler.
+- Day 2 completed: events, state, counter updates, `addEventListener()`, `textContent`, `classList.add()`, `classList.remove()`, conditionals, and disabling buttons with `.disabled`.
+- Built the Focus Task Tracker mini project with input handling, an array of task objects, `push()`, `forEach()`, `findIndex()`, `splice()`, DOM rendering with `createElement()` and `appendChild()`, complete/delete buttons, summary counts, and empty-message visibility with `.hidden`.
+- Day 3 prepared: arrays, objects, filtering, `forEach()`, `filter()`, `findIndex()`, `splice()`, and rendering UI from state.
+- Current cleanup targets: complete Day 3, understand `findIndex()` and `splice()` deeply, rename `summery()` to `renderSummary()`, prefer `const`/`let` over `var`, avoid accidental global variables, and separate task creation/rendering into clearer functions.
 
 Important correction to remember:
 - `parent.appendChild(child)` means "put the child inside the parent".
