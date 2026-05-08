@@ -1,5 +1,7 @@
 # Focus Task Tracker Briefing
 
+[Back to README](../README.md) | [Previous: Day 2](../learning%20day%202/briefing.md) | [Next: Day 3](../learning%20day%203/briefing.md)
+
 ## Goal
 
 Build a small interactive task tracker using vanilla JavaScript, with task creation, completion, deletion, summary counts, and empty-state handling.
@@ -41,3 +43,4 @@ Open `index.html` in a browser. Add a task, complete it, delete it, and watch th
 
 This is the strongest project in the repository so far. It shows the practical frontend loop: collect user input, update state, render the UI, and keep feedback accurate.
 
+[Back to README](../README.md) | [Previous: Day 2](../learning%20day%202/briefing.md) | [Next: Day 3](../learning%20day%203/briefing.md)

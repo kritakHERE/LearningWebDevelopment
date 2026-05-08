@@ -1,5 +1,7 @@
 # Day 3 Briefing - Arrays, Objects, And Rendering State
 
+[Back to README](../README.md) | [Previous: Focus Task Tracker](../focus-task-tracker/briefing.md) | [Next: Learning Progress](../learning%20progress.md)
+
 ## Goal
 
 Practice the core data-to-UI pattern behind frontend development: store data in an array of objects, filter it, update it, and render the current state into the DOM.
@@ -40,3 +42,4 @@ Open `index.html` in a browser. Click **Render Topics**, test the filter buttons
 
 This folder shows early React-style thinking without a framework: the array is the source of truth, and the UI is rebuilt from the current state.
 
+[Back to README](../README.md) | [Previous: Focus Task Tracker](../focus-task-tracker/briefing.md) | [Next: Learning Progress](../learning%20progress.md)

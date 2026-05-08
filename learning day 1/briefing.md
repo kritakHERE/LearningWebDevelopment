@@ -1,5 +1,7 @@
 # Day 1 Briefing - DOM Basics
 
+[Back to README](../README.md) | [Next: Day 2](../learning%20day%202/briefing.md)
+
 ## Goal
 
 Practice the first layer of browser JavaScript: selecting existing HTML, creating new elements, changing their content, placing them on the page, and removing them.
@@ -37,3 +39,4 @@ Open `index.html` in a browser, then click **Run Practice Code**.
 
 This folder shows that I understand the DOM as a live page structure that JavaScript can read, create, modify, and remove.
 
+[Back to README](../README.md) | [Next: Day 2](../learning%20day%202/briefing.md)

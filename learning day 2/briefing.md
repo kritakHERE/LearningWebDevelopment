@@ -1,5 +1,7 @@
 # Day 2 Briefing - Events, State, And Class Control
 
+[Back to README](../README.md) | [Previous: Day 1](../learning%20day%201/briefing.md) | [Next: Focus Task Tracker](../focus-task-tracker/briefing.md)
+
 ## Goal
 
 Practice user interaction by building a counter that responds to button clicks and updates the page from JavaScript state.
@@ -38,3 +40,4 @@ Open `index.html` in a browser and use the Increase, Decrease, and Reset buttons
 
 This folder shows that I can connect user input to state changes and keep the interface updated through a reusable function.
 
+[Back to README](../README.md) | [Previous: Day 1](../learning%20day%201/briefing.md) | [Next: Focus Task Tracker](../focus-task-tracker/briefing.md)
