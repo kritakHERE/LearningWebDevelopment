@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 3 Briefing - Rendering State</title>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f6f7fb; color: #182230; line-height: 1.6; }
+    main { width: min(860px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 48px; }
+    a { color: #0f766e; font-weight: 700; }
+    .nav { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+    .nav a { padding: 8px 12px; border: 1px solid #d0d5dd; border-radius: 8px; background: #fff; text-decoration: none; }
+    section { margin: 18px 0; padding: 20px; border: 1px solid #d0d5dd; border-radius: 8px; background: #fff; }
+    h1 { line-height: 1.1; }
+    code { background: #edf2f7; padding: 2px 5px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <main>
+    <nav class="nav" aria-label="Page navigation">
+      <a href="../index.html">Portfolio Home</a>
+      <a href="../focus-task-tracker/briefing.html">Previous: Focus Task Tracker</a>
+      <a href="../learning-progress.html">Next: Learning Progress</a>
+      <a href="index.html">Open Demo</a>
+    </nav>
+
+    <h1>Day 3 Briefing - Arrays, Objects, And Rendering State</h1>
+    <p>Practice the core data-to-UI pattern behind frontend development: store data in an array of objects, filter it, update it, and render the current state into the DOM.</p>
+
+    <section>
+      <h2>What This Demonstrates</h2>
+      <ul>
+        <li>An array of topic objects with <code>id</code>, <code>name</code>, and <code>completed</code>.</li>
+        <li><code>forEach()</code> for rendering each visible topic.</li>
+        <li><code>filter()</code> for showing all, completed, or remaining topics.</li>
+        <li><code>findIndex()</code> for finding the first incomplete topic.</li>
+        <li><code>splice()</code> for removing an item from the array.</li>
+        <li>Button event listeners that change state and re-render.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Files To Review</h2>
+      <ul>
+        <li><a href="index.html">index.html</a></li>
+        <li><a href="style.css">style.css</a></li>
+        <li><a href="script.js">script.js</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Recruiter Signal</h2>
+      <p>This folder shows early React-style thinking without a framework: the array is the source of truth, and the UI is rebuilt from the current state.</p>
+    </section>
+  </main>
+</body>
+</html>

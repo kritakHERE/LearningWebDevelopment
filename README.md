@@ -8,23 +8,23 @@ The work here is intentionally simple and transparent. Each folder shows a speci
 
 | Area | What it demonstrates | Open |
 | --- | --- | --- |
-| [Day 1 - DOM Basics](learning%20day%201/briefing.md) | Selecting elements, creating elements, setting text, appending, changing attributes, removing elements | [Demo](learning%20day%201/index.html) |
-| [Day 2 - Events and State](learning%20day%202/briefing.md) | Button events, changing state, rendering text updates, class changes, disabled button behavior | [Demo](learning%20day%202/index.html) |
-| [Focus Task Tracker](focus-task-tracker/briefing.md) | A small interactive task app with input handling, task state, rendering, complete/delete actions, summary counts, and empty states | [Demo](focus-task-tracker/index.html) |
-| [Day 3 - Arrays and Rendering State](learning%20day%203/briefing.md) | Array of objects, filtering, rendering lists, `forEach()`, `filter()`, `findIndex()`, `splice()`, and state-to-UI flow | [Demo](learning%20day%203/index.html) |
-| [Learning Progress](learning%20progress.md) | Written record of concepts, definitions of done, self-evaluation, and next learning goals | [Open notes](learning%20progress.md) |
+| [Day 1 - DOM Basics](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%201/briefing.html) | Selecting elements, creating elements, setting text, appending, changing attributes, removing elements | [Demo](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%201/index.html) |
+| [Day 2 - Events and State](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%202/briefing.html) | Button events, changing state, rendering text updates, class changes, disabled button behavior | [Demo](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%202/index.html) |
+| [Focus Task Tracker](https://kritakhere.github.io/LearningWebDevelopment/focus-task-tracker/briefing.html) | A small interactive task app with input handling, task state, rendering, complete/delete actions, summary counts, and empty states | [Demo](https://kritakhere.github.io/LearningWebDevelopment/focus-task-tracker/index.html) |
+| [Day 3 - Arrays and Rendering State](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%203/briefing.html) | Array of objects, filtering, rendering lists, `forEach()`, `filter()`, `findIndex()`, `splice()`, and state-to-UI flow | [Demo](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%203/index.html) |
+| [Learning Progress](https://kritakhere.github.io/LearningWebDevelopment/learning-progress.html) | Written record of concepts, definitions of done, self-evaluation, and next learning goals | [Open notes](https://kritakhere.github.io/LearningWebDevelopment/learning-progress.html) |
 
 ## Guided Reading Path
 
 Start here, then move through the linked briefings in order:
 
-1. [Day 1 briefing - DOM basics](learning%20day%201/briefing.md)
-2. [Day 2 briefing - events and state](learning%20day%202/briefing.md)
-3. [Focus Task Tracker briefing - mini project](focus-task-tracker/briefing.md)
-4. [Day 3 briefing - arrays and rendering state](learning%20day%203/briefing.md)
-5. [Learning progress journal](learning%20progress.md)
+1. [Day 1 briefing - DOM basics](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%201/briefing.html)
+2. [Day 2 briefing - events and state](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%202/briefing.html)
+3. [Focus Task Tracker briefing - mini project](https://kritakhere.github.io/LearningWebDevelopment/focus-task-tracker/briefing.html)
+4. [Day 3 briefing - arrays and rendering state](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%203/briefing.html)
+5. [Learning progress journal](https://kritakhere.github.io/LearningWebDevelopment/learning-progress.html)
 
-For the published GitHub Pages view, open [the portfolio landing page](index.html).
+For the published GitHub Pages view, open [the portfolio landing page](https://kritakhere.github.io/LearningWebDevelopment/).
 
 ## What Recruiters Can Look For
 
@@ -48,7 +48,7 @@ This appears most clearly in the Focus Task Tracker and Day 3 exercises, where a
 
 ## Folder Briefings
 
-Each learning or project folder includes a `briefing.md` file with:
+Each learning or project folder includes a `briefing.md` source file and a `briefing.html` page for GitHub Pages with:
 
 - the goal of the folder,
 - the skills demonstrated,
@@ -64,10 +64,10 @@ No build step is required. Each exercise is a static browser project.
 
 Open any demo page directly in a browser:
 
-- [Day 1 demo](learning%20day%201/index.html)
-- [Day 2 demo](learning%20day%202/index.html)
-- [Focus Task Tracker demo](focus-task-tracker/index.html)
-- [Day 3 demo](learning%20day%203/index.html)
+- [Day 1 demo](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%201/index.html)
+- [Day 2 demo](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%202/index.html)
+- [Focus Task Tracker demo](https://kritakhere.github.io/LearningWebDevelopment/focus-task-tracker/index.html)
+- [Day 3 demo](https://kritakhere.github.io/LearningWebDevelopment/learning%20day%203/index.html)
 
 ## Learning Direction
 
