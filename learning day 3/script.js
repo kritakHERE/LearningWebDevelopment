@@ -45,6 +45,18 @@
 
 // Work section for Exercise 1:
 
+const totalCount = document.getElementById("total-count");
+const completedCount = document.getElementById("completed-count");
+const remainingCount = document.getElementById("remaining-count");
+const filterLabel = document.getElementById("filter-label");
+const emptyMessage = document.getElementById("empty-message");
+const topicList = document.getElementById("topic-list");
+const renderButton = document.getElementById("render-button");
+const completeFirstButton = document.getElementById("complete-first-button");
+const removeLastButton = document.getElementById("remove-last-button");
+const showAllButton = document.getElementById("show-all-button");
+const showCompletedButton = document.getElementById("show-completed-button");
+const showRemainingButton = document.getElementById("show-remaining-button");
 
 
 
@@ -85,7 +97,13 @@
 
 // Work section for Exercise 2:
 
-
+const items = [
+  { id: 1, name: "DOM slection", completed: false },
+  { id: 2, name: "Event listeners", completed: true },
+  { id: 3, name: "Arrays", completed: true},
+  { id: 4, name: "Objects", completed: false },
+  { id: 5, name: "Rendering from state", completed: false },
+];
 
 
 /*
@@ -108,7 +126,7 @@
 
 // Work section for Exercise 3:
 
-
+let currentFilter = "all"; // other filter being: completed and remaining
 
 
 /*
@@ -145,8 +163,23 @@
 */
 
 // Work section for Exercise 4:
+let total = 0;
 
+let remaining =0;
+function renderSummery(){
+  total = items.length;
+  let completed = 0;
+  items.forEach((item) =>{
+    if (item.completed === true){
+      completed += 1;
+    }
+  });
+  remaining = total - completed;
 
+  totalCount.textContent = total;
+  completedCount.textContent = completed;
+  remainingCount.textContent = remaining;
+}
 
 
 /*
@@ -174,7 +207,19 @@
 
 // Work section for Exercise 5:
 
-
+function getVisibleTopics(){
+  let result = [];
+  if (currentFilter === "all"){
+    result = items;
+  }
+  else if (currentFilter === "completed"){
+    result = items.filter((item) => item.completed === true);
+  }
+  else{
+    result = items.filter((item) => item.completed === false);
+  }
+  return result;
+}
 
 
 /*
@@ -217,7 +262,38 @@
 
 // Work section for Exercise 6:
 
+function renderTopics(){
+  topicList.innerHTML = "";
+  const displayTopicList = getVisibleTopics();
+  displayTopicList.forEach((item) => {
+    const topic = document.createElement("li");
+    const topicName = document.createElement("span");
+    const topicStatus = document.createElement("span");
 
+    topic.classList.add("topic-item");
+    topicName.classList.add("topic-name");
+    topicStatus.classList.add("topic-status");
+
+    topicName.textContent = item.name;
+
+    if(item.completed){
+      topic.classList.add('completed');
+      topicStatus.textContent = "Completed"
+    }
+    else {
+      topicStatus.textContent = "Remaining";
+    }
+
+    topic.appendChild(topicName);
+    topic.appendChild(topicStatus);
+    topicList.appendChild(topic);
+
+
+  });
+
+  emptyMessage.hidden = displayTopicList.length > 0;
+  renderSummery();
+}
 
 
 /*
@@ -249,7 +325,13 @@
 
 // Work section for Exercise 7:
 
-
+function completeFirstIncomplete(){
+  const index = items.findIndex((item)=> item.completed === false);
+  if (index !== -1){
+    items[index].completed = true;
+  }
+  renderTopics();
+}
 
 
 /*
@@ -278,7 +360,14 @@
 
 // Work section for Exercise 8:
 
+function removeLastTopic(){
+  const index = items.length - 1;
+  if (index !== -1){
+    items.splice(index, 1);
+  }
 
+  renderTopics();
+}
 
 
 /*
@@ -314,8 +403,21 @@
 
 // Work section for Exercise 9:
 
-
-
+renderButton.addEventListener('click', renderTopics);
+completeFirstButton.addEventListener('click', completeFirstIncomplete);
+removeLastButton.addEventListener('click', removeLastTopic);
+showAllButton.addEventListener('click', ()=>{
+  currentFilter = 'all';
+  renderTopics();
+});
+showCompletedButton.addEventListener('click', ()=>{
+  currentFilter = 'completed';
+  renderTopics();
+});
+showRemainingButton.addEventListener('click', ()=>{
+  currentFilter = 'remaining';
+  renderTopics();
+});
 
 /*
   Final definition of done:

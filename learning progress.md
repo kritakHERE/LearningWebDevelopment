@@ -1,6 +1,6 @@
 # Learning Progress
 
-Updated: 2026-05-01
+Updated: 2026-05-08
 
 ## Current Level
 
@@ -10,8 +10,8 @@ Current status:
 - Day 1 DOM basics completed.
 - Day 2 counter project completed.
 - Focus Task Tracker mini project built with add, complete, delete, summary, empty-state, and disabled-button behavior.
-- Day 3 lesson folder prepared for arrays, objects, filtering, and rendering from state.
-- Main next topic: understand array methods more deeply, especially `forEach()`, `findIndex()`, `splice()`, and `filter()`, then clean up the task tracker code.
+- Day 3 arrays, objects, filtering, and rendering-from-state lesson completed.
+- Main next topic: keep practicing array methods until `forEach()`, `findIndex()`, `splice()`, and `filter()` feel natural, then clean up naming and structure in the task tracker code.
 
 ## Day 1 - JavaScript DOM Basics
 
@@ -293,7 +293,7 @@ Practice files:
 - `learning day 3/style.css`
 - `learning day 3/script.js`
 
-Concepts to practice:
+Concepts practiced:
 - Store multiple items in an array.
 - Represent each item as an object with `id`, `name`, and `completed`.
 - Use `forEach()` to render items into the DOM.
@@ -303,18 +303,26 @@ Concepts to practice:
 - Keep UI synced with data using render functions.
 
 Definition of done:
-- [ ] Select all needed DOM elements.
-- [ ] Create an array of topic objects.
-- [ ] Create a `renderSummary()` function.
-- [ ] Create a `getVisibleTopics()` function using `filter()`.
-- [ ] Create a `renderTopics()` function using `forEach()`.
-- [ ] Use `findIndex()` to complete the first incomplete topic.
-- [ ] Use `splice()` to remove the last topic.
-- [ ] Connect all buttons with `addEventListener()`.
-- [ ] Explain the flow: user click -> state changes -> render function updates the UI.
+- [x] Select all needed DOM elements.
+- [x] Create an array of topic objects.
+- [x] Create a summary render function to update total, completed, and remaining counts.
+- [x] Create a `getVisibleTopics()` function using `filter()`.
+- [x] Create a `renderTopics()` function using `forEach()`.
+- [x] Build list items with `createElement()`, `textContent`, and `appendChild()`.
+- [x] Add the `completed` class when a topic is complete.
+- [x] Show and hide the empty message with `.hidden`.
+- [x] Use `findIndex()` to complete the first incomplete topic.
+- [x] Use `splice()` to remove the last topic.
+- [x] Connect all buttons with `addEventListener()`.
+- [x] Explain the flow: user click -> state changes -> render function updates the UI.
 
 Self-evaluation:
-Not started yet. This lesson is prepared as the next focused practice before building another full project.
+Day 3 is complete. I practiced the full state-to-UI loop: data lives in an array, buttons change state, and `renderTopics()` rebuilds the visible HTML from the current data. The most important learning was that the array is the source of truth, while the DOM is the current visual result.
+
+Cleanup notes:
+- Rename `renderSummery()` to `renderSummary()` for correct spelling and consistency with the exercise.
+- Prefer declaring summary values inside the render function unless they truly need to be shared.
+- Fix small text typos such as `DOM slection`.
 
 ## JavaScript Syntax I Have Learned So Far
 
