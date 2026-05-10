@@ -238,7 +238,7 @@ function renderTasks(){
       
     });
   });
-  summery();
+  renderSummary();
   emptyMessage.hidden = tasks.length > 0;
 }
 
@@ -297,15 +297,15 @@ function renderTasks(){
 */
 
 // Work section for Exercise 8:
-var totalTaskCount = 0;
-var completedTaskCount = 0;
-var remainingTaskCount = 0;
+let totalTaskCount = 0;
+let completedTaskCount = 0;
+let remainingTaskCount = 0;
 
-function summery(){
+function renderSummary(){
   totalTaskCount = 0;
   completedTaskCount = 0;
   remainingTaskCount = 0;
-  var totalTaskCount = tasks.length;
+  let totalTaskCount = tasks.length;
   completedTask = 0;
   tasks.forEach((task)=>{
     if (task.completed){
