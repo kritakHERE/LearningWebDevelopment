@@ -1,460 +1,263 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JavaScript Frontend Learning Portfolio</title>
-  <style>
-    :root {
-      color-scheme: light;
-      --bg: #f6f7fb;
-      --surface: #ffffff;
-      --surface-soft: #edf2f7;
-      --text: #182230;
-      --muted: #667085;
-      --border: #d0d5dd;
-      --accent: #0f766e;
-      --accent-dark: #115e59;
-      --accent-soft: #ccfbf1;
-      --focus: #f59e0b;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-    }
-
-    a {
-      color: inherit;
-    }
-
-    .page {
-      width: min(1120px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 32px 0 48px;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 14px 0 28px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 800;
-    }
-
-    .brand-mark {
-      display: grid;
-      width: 34px;
-      height: 34px;
-      place-items: center;
-      border-radius: 8px;
-      background: var(--text);
-      color: #ffffff;
-      font-size: 0.9rem;
-    }
-
-    .nav-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .nav-links a,
-    .button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 40px;
-      padding: 9px 13px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--surface);
-      color: var(--text);
-      font-size: 0.92rem;
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .nav-links a:hover,
-    .button:hover {
-      border-color: var(--accent);
-      color: var(--accent-dark);
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-      gap: 24px;
-      align-items: stretch;
-      padding: 28px 0;
-    }
-
-    .hero-copy,
-    .status-panel,
-    .project-card,
-    .note-panel {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--surface);
-      box-shadow: 0 14px 36px rgba(16, 24, 40, 0.08);
-    }
-
-    .hero-copy {
-      padding: 32px;
-    }
-
-    .eyebrow {
-      margin: 0 0 10px;
-      color: var(--accent-dark);
-      font-size: 0.82rem;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    h1,
-    h2,
-    h3,
-    p {
-      margin-top: 0;
-    }
-
-    h1 {
-      max-width: 760px;
-      margin-bottom: 16px;
-      font-size: clamp(2rem, 4vw, 4.4rem);
-      line-height: 1;
-      letter-spacing: 0;
-    }
-
-    .intro {
-      max-width: 720px;
-      margin-bottom: 24px;
-      color: var(--muted);
-      font-size: 1.08rem;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .button.primary {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #ffffff;
-    }
-
-    .button.primary:hover {
-      background: var(--accent-dark);
-      color: #ffffff;
-    }
-
-    .status-panel {
-      display: grid;
-      gap: 14px;
-      align-content: start;
-      padding: 24px;
-    }
-
-    .metric {
-      padding: 16px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--surface-soft);
-    }
-
-    .metric strong {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 1.6rem;
-    }
-
-    .metric span {
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .section {
-      padding: 24px 0;
-    }
-
-    .section-heading {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .section-heading h2 {
-      margin-bottom: 0;
-      font-size: 1.6rem;
-    }
-
-    .section-heading p {
-      max-width: 620px;
-      margin-bottom: 0;
-      color: var(--muted);
-    }
-
-    .project-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .project-card {
-      display: grid;
-      gap: 14px;
-      padding: 22px;
-    }
-
-    .card-top {
-      display: flex;
-      align-items: start;
-      justify-content: space-between;
-      gap: 14px;
-    }
-
-    .project-card h3 {
-      margin-bottom: 6px;
-      font-size: 1.18rem;
-    }
-
-    .project-card p {
-      color: var(--muted);
-    }
-
-    .tag {
-      flex: 0 0 auto;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent-dark);
-      font-size: 0.78rem;
-      font-weight: 800;
-    }
-
-    .skill-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .skill-list li {
-      padding: 6px 8px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #ffffff;
-      color: var(--muted);
-      font-size: 0.85rem;
-      font-weight: 700;
-    }
-
-    .card-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 2px;
-    }
-
-    .note-panel {
-      padding: 22px;
-    }
-
-    .note-panel p {
-      margin-bottom: 0;
-      color: var(--muted);
-    }
-
-    footer {
-      padding-top: 28px;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    @media (max-width: 820px) {
-      .topbar,
-      .section-heading {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .hero,
-      .project-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero-copy {
-        padding: 24px;
-      }
-    }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Innovation Detective | ARIC</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="page">
-    <header class="topbar">
-      <div class="brand" aria-label="Portfolio home">
-        <span class="brand-mark">JS</span>
-        <span>Frontend Learning Portfolio</span>
-      </div>
-      <nav class="nav-links" aria-label="Main navigation">
-        <a href="#projects">Projects</a>
-        <a href="https://github.com/kritakhere/LearningWebDevelopment#readme">README</a>
-        <a href="learning-progress.html">Progress Notes</a>
-      </nav>
-    </header>
+  <div class="ambient" aria-hidden="true">
+    <div class="ambient-grid"></div>
+    <div class="ambient-sweep"></div>
+  </div>
 
-    <main>
-      <section class="hero" aria-labelledby="page-title">
-        <div class="hero-copy">
-          <p class="eyebrow">HTML, CSS, Vanilla JavaScript</p>
-          <h1 id="page-title">A practical frontend learning journey from DOM basics to state-driven UI.</h1>
-          <p class="intro">
-            This portfolio collects small browser projects that show how I am building toward frontend and React-style development: user actions change state, and render functions update the interface from that state.
-          </p>
-          <div class="hero-actions">
-            <a class="button primary" href="focus-task-tracker/index.html">Open Focus Task Tracker</a>
-            <a class="button" href="#projects">Browse Learning Path</a>
+  <header class="topbar">
+    <button class="brand-button" type="button" data-go="home" aria-label="Go to home">
+      <span class="brand-mark">ARIC</span>
+      <span class="brand-copy">Innovation Detective</span>
+    </button>
+    <nav class="top-nav" aria-label="Main sections">
+      <button type="button" data-go="detective">Detective</button>
+      <button type="button" data-go="mythbusters">Mythbusters</button>
+      <button type="button" data-go="impossible">Questions</button>
+      <button type="button" data-go="rabbit">Rabbit Hole</button>
+      <button type="button" data-go="vault">Vault</button>
+    </nav>
+    <div class="top-actions">
+      <span class="status-pill" id="curiosityPill">Curiosity 0</span>
+      <button class="ghost-button" type="button" id="randomChallenge">Random</button>
+      <button class="ghost-button" type="button" id="fullscreenBtn">Fullscreen</button>
+    </div>
+  </header>
+
+  <main id="app">
+    <section class="screen active" id="home" aria-labelledby="homeTitle">
+      <div class="home-grid">
+        <div class="home-hero">
+          <p class="eyebrow">Applied Research and Innovation Club Showcase</p>
+          <h1 id="homeTitle">INNOVATION DETECTIVE</h1>
+          <p class="subtitle">Every innovation began with a question.</p>
+          <div class="hero-actions" aria-label="Start modules">
+            <button class="launch-button primary" type="button" data-go="detective">Start Detective</button>
+            <button class="launch-button" type="button" data-go="mythbusters">Mythbusters</button>
+            <button class="launch-button" type="button" data-go="impossible">Impossible Questions</button>
+            <button class="launch-button" type="button" data-go="rabbit">Rabbit Hole Explorer</button>
+            <button class="launch-button" type="button" data-go="vault">Question Vault</button>
           </div>
         </div>
-
-        <aside class="status-panel" aria-label="Portfolio summary">
-          <div class="metric">
-            <strong>4</strong>
-            <span>Completed learning/project folders</span>
+        <aside class="feature-panel">
+          <p class="panel-label">Daily Featured Question</p>
+          <h2 id="dailyQuestion">Would you upload your mind into a computer?</h2>
+          <div class="signal-row">
+            <div>
+              <span class="metric-value" id="statCards">150</span>
+              <span class="metric-label">detective cases</span>
+            </div>
+            <div>
+              <span class="metric-value" id="statMyths">100</span>
+              <span class="metric-label">myths</span>
+            </div>
+            <div>
+              <span class="metric-value" id="statQuestions">200</span>
+              <span class="metric-label">questions</span>
+            </div>
           </div>
-          <div class="metric">
-            <strong>Vanilla JS</strong>
-            <span>Current implementation focus before React</span>
-          </div>
-          <div class="metric">
-            <strong>State -> UI</strong>
-            <span>Main pattern practiced across the repository</span>
+          <div class="dashboard">
+            <div class="dash-tile">
+              <span id="dashCuriosity">0</span>
+              <small>curiosity taps</small>
+            </div>
+            <div class="dash-tile">
+              <span id="dashMyths">0</span>
+              <small>myths answered</small>
+            </div>
+            <div class="dash-tile">
+              <span id="dashVault">0</span>
+              <small>vault questions</small>
+            </div>
           </div>
         </aside>
-      </section>
+      </div>
+    </section>
 
-      <section id="projects" class="section" aria-labelledby="projects-title">
-        <div class="section-heading">
-          <h2 id="projects-title">Learning Path</h2>
-          <p>Each folder has a runnable page and a short briefing for quick review.</p>
+    <section class="screen" id="detective" aria-labelledby="detectiveTitle">
+      <div class="module-header">
+        <div>
+          <p class="eyebrow">Module 1</p>
+          <h2 id="detectiveTitle">Innovation Detective</h2>
         </div>
-
-        <div class="project-grid">
-          <article class="project-card">
-            <div class="card-top">
-              <div>
-                <h3>Day 1 - DOM Basics</h3>
-                <p>Select, create, fill, append, modify, and remove DOM elements.</p>
-              </div>
-              <span class="tag">Basics</span>
-            </div>
-            <ul class="skill-list">
-              <li>getElementById</li>
-              <li>createElement</li>
-              <li>appendChild</li>
-              <li>remove</li>
-            </ul>
-            <div class="card-actions">
-              <a class="button primary" href="learning%20day%201/index.html">Open Demo</a>
-              <a class="button" href="learning%20day%201/briefing.html">Briefing</a>
-            </div>
-          </article>
-
-          <article class="project-card">
-            <div class="card-top">
-              <div>
-                <h3>Day 2 - Events And State</h3>
-                <p>Use buttons to change state and render a counter interface.</p>
-              </div>
-              <span class="tag">Events</span>
-            </div>
-            <ul class="skill-list">
-              <li>addEventListener</li>
-              <li>let state</li>
-              <li>classList</li>
-              <li>disabled</li>
-            </ul>
-            <div class="card-actions">
-              <a class="button primary" href="learning%20day%202/index.html">Open Demo</a>
-              <a class="button" href="learning%20day%202/briefing.html">Briefing</a>
-            </div>
-          </article>
-
-          <article class="project-card">
-            <div class="card-top">
-              <div>
-                <h3>Focus Task Tracker</h3>
-                <p>Add, complete, delete, summarize, and render tasks from an array.</p>
-              </div>
-              <span class="tag">Mini App</span>
-            </div>
-            <ul class="skill-list">
-              <li>input handling</li>
-              <li>array state</li>
-              <li>findIndex</li>
-              <li>splice</li>
-            </ul>
-            <div class="card-actions">
-              <a class="button primary" href="focus-task-tracker/index.html">Open Demo</a>
-              <a class="button" href="focus-task-tracker/briefing.html">Briefing</a>
-            </div>
-          </article>
-
-          <article class="project-card">
-            <div class="card-top">
-              <div>
-                <h3>Day 3 - Rendering State</h3>
-                <p>Filter and render topic objects using the same state-to-UI flow used in modern frameworks.</p>
-              </div>
-              <span class="tag">State</span>
-            </div>
-            <ul class="skill-list">
-              <li>forEach</li>
-              <li>filter</li>
-              <li>render function</li>
-              <li>empty state</li>
-            </ul>
-            <div class="card-actions">
-              <a class="button primary" href="learning%20day%203/index.html">Open Demo</a>
-              <a class="button" href="learning%20day%203/briefing.html">Briefing</a>
-            </div>
-          </article>
+        <div class="module-meta">
+          <span id="detectiveCounter">1 / 150</span>
+          <span id="detectiveScore">Score 0 : 0</span>
         </div>
-      </section>
-
-      <section class="section" aria-labelledby="review-title">
-        <div class="note-panel">
-          <h2 id="review-title">Review Notes</h2>
-          <p>
-            This repository is a learning portfolio rather than a finished product suite. The strongest signal is the visible progression: DOM manipulation, event handling, state, arrays of objects, render functions, and increasingly app-like behavior.
-          </p>
+      </div>
+      <div class="filter-strip" id="categoryFilters" aria-label="Detective category filters"></div>
+      <div class="detective-layout">
+        <div class="cue-stage" aria-label="Innovation problem cue">
+          <div class="cue-badge" id="detectiveCategory">Technology</div>
+          <div class="cue-emoji" id="detectiveEmoji" aria-hidden="true">💡</div>
+          <p class="cue-label">Problem Cue</p>
+          <h3 id="detectiveCue">A problem needed a clever solution.</h3>
+          <p class="cue-sub" id="detectiveCueSub">Guess the innovation before revealing the case.</p>
         </div>
-      </section>
-    </main>
+        <article class="detective-card" id="detectiveCard">
+          <div class="question-face">
+            <p class="prompt-kicker">Case File</p>
+            <h3>What innovation solved this problem?</h3>
+            <p class="case-hint" id="caseHint">Read the cue. Guess the invention before revealing the case notes.</p>
+          </div>
+          <div class="reveal-face">
+            <p class="prompt-kicker">Case Solved</p>
+            <h3 id="revealName">Product Name</h3>
+            <dl class="reveal-list">
+              <div>
+                <dt>Problem Solved</dt>
+                <dd id="revealProblem"></dd>
+              </div>
+              <div>
+                <dt>Historical Context</dt>
+                <dd id="revealContext"></dd>
+              </div>
+              <div>
+                <dt>Why It Was Innovative</dt>
+                <dd id="revealInnovation"></dd>
+              </div>
+              <div>
+                <dt>Impact on Society</dt>
+                <dd id="revealImpact"></dd>
+              </div>
+            </dl>
+          </div>
+        </article>
+      </div>
+      <div class="control-dock">
+        <button type="button" id="detectiveReveal">Reveal</button>
+        <button type="button" id="detectiveGotIt">Got It</button>
+        <button type="button" id="detectiveMissed">Missed</button>
+        <button type="button" id="detectiveRandom">Random Card</button>
+        <button type="button" id="detectiveNext">Next Card</button>
+      </div>
+    </section>
 
-    <footer>
-      <p>Built as a static GitHub Pages entry point for a JavaScript frontend learning journey.</p>
-    </footer>
-  </div>
+    <section class="screen" id="mythbusters" aria-labelledby="mythTitle">
+      <div class="module-header">
+        <div>
+          <p class="eyebrow">Module 2</p>
+          <h2 id="mythTitle">Mythbusters</h2>
+        </div>
+        <div class="module-meta">
+          <span id="mythCounter">1 / 100</span>
+          <span id="mythScore">Score 0 / 0</span>
+        </div>
+      </div>
+      <article class="myth-card">
+        <p class="prompt-kicker">True or False</p>
+        <h3 id="mythStatement">Humans use only 10% of their brain.</h3>
+        <div class="binary-actions">
+          <button type="button" id="mythTrue">TRUE</button>
+          <button type="button" id="mythFalse">FALSE</button>
+        </div>
+        <div class="myth-result" id="mythResult" aria-live="polite">
+          <strong id="mythAnswer"></strong>
+          <p id="mythExplanation"></p>
+        </div>
+      </article>
+      <div class="control-dock">
+        <button type="button" id="mythNext">Next Myth</button>
+        <button type="button" id="mythRandom">Random Myth</button>
+        <button type="button" id="mythMode">Random Mode: Off</button>
+      </div>
+    </section>
+
+    <section class="screen impossible-screen" id="impossible" aria-labelledby="impossibleTitle">
+      <div class="module-header floating-header">
+        <div>
+          <p class="eyebrow">Module 3</p>
+          <h2 id="impossibleTitle">Impossible Questions</h2>
+        </div>
+        <div class="module-meta">
+          <span id="impossibleCounter">1 / 200</span>
+          <span id="impossibleStatus">Auto-loop</span>
+        </div>
+      </div>
+      <div class="question-stage">
+        <p class="prompt-kicker">Think Fast</p>
+        <h3 id="impossibleQuestion">Would you upload your mind into a computer?</h3>
+      </div>
+      <div class="control-dock floating-dock">
+        <button type="button" id="impossiblePrev">Previous</button>
+        <button type="button" id="impossibleNext">Next</button>
+        <button type="button" id="impossiblePause">Pause</button>
+        <button type="button" id="presentationMode">Presentation Mode</button>
+      </div>
+    </section>
+
+    <section class="screen" id="rabbit" aria-labelledby="rabbitTitle">
+      <div class="module-header">
+        <div>
+          <p class="eyebrow">Module 4</p>
+          <h2 id="rabbitTitle">Rabbit Hole Explorer</h2>
+        </div>
+        <div class="module-meta">
+          <span id="rabbitCounter">1 / 30</span>
+          <span id="rabbitTopicLabel">AI</span>
+        </div>
+      </div>
+      <div class="topic-strip" id="topicStrip" aria-label="Rabbit hole topics"></div>
+      <article class="rabbit-card">
+        <p class="prompt-kicker" id="rabbitTopic">AI</p>
+        <h3 id="rabbitFact">Dolphins have names for one another.</h3>
+      </article>
+      <div class="control-dock">
+        <button type="button" id="rabbitPrev">Previous</button>
+        <button type="button" id="rabbitNext">Next</button>
+        <button type="button" id="rabbitRandom">Random</button>
+      </div>
+    </section>
+
+    <section class="screen" id="vault" aria-labelledby="vaultTitle">
+      <div class="module-header">
+        <div>
+          <p class="eyebrow">Module 5</p>
+          <h2 id="vaultTitle">Question Vault</h2>
+        </div>
+        <div class="module-meta">
+          <span id="vaultCount">0 stored</span>
+          <span>Local only</span>
+        </div>
+      </div>
+      <div class="vault-layout">
+        <form class="vault-form" id="questionForm">
+          <label for="questionInput">What is the most interesting question you have ever thought about?</label>
+          <textarea id="questionInput" rows="5" maxlength="220" placeholder="Type a question that could start a research project..."></textarea>
+          <div class="form-row">
+            <span id="questionLimit">0 / 220</span>
+            <button type="submit">Submit Question</button>
+          </div>
+        </form>
+        <div class="vault-column">
+          <section class="vault-panel">
+            <h3>Recent Questions</h3>
+            <div class="question-list" id="recentQuestions"></div>
+          </section>
+          <section class="vault-panel">
+            <h3>Top Liked</h3>
+            <div class="question-list compact" id="topQuestions"></div>
+          </section>
+        </div>
+      </div>
+      <section class="question-wall" aria-labelledby="wallTitle">
+        <div class="wall-header">
+          <h3 id="wallTitle">Random Question Wall</h3>
+          <button type="button" id="shuffleWall">Shuffle Wall</button>
+        </div>
+        <div class="wall-grid" id="randomWall"></div>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
 </body>
 </html>
