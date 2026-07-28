@@ -1,263 +1,1043 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Innovation Detective | ARIC</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML File Explorer - Directory Scanner</title>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --panel-bg: #ffffff;
+            --border: #e0e4e8;
+            --text: #2c3e50;
+            --text-secondary: #6b7d8e;
+            --accent: #4a80f0;
+            --accent-light: #e8f0fe;
+            --hover: #f5f7fa;
+            --selected: #dce8fc;
+            --badge-bg: #e8ecf1;
+            --badge-text: #5a6c7d;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+            --radius: 10px;
+            --radius-sm: 6px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            --mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ── HEADER ─────────────────────────── */
+        .header {
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            flex-wrap: wrap;
+        }
+
+        .header-logo {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-logo .icon {
+            width: 34px;
+            height: 34px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: var(--transition);
+            white-space: nowrap;
+            font-family: var(--font);
+            letter-spacing: 0.01em;
+            user-select: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        .btn-primary:hover {
+            background: #3a6de0;
+            border-color: #3a6de0;
+            box-shadow: 0 2px 8px rgba(74, 128, 240, 0.3);
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-outline {
+            background: var(--panel-bg);
+            color: var(--text);
+            border-color: var(--border);
+        }
+        .btn-outline:hover {
+            background: var(--hover);
+            border-color: #c5cad3;
+        }
+        .btn-outline:active {
+            background: #e8ecf1;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            gap: 5px;
+            border-radius: 5px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .stats-pills {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+            letter-spacing: 0.02em;
+        }
+        .stat-pill strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* ── MAIN LAYOUT ────────────────────── */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 0;
+        }
+
+        /* ── TREE PANEL ─────────────────────── */
+        .tree-panel {
+            width: 44%;
+            min-width: 320px;
+            max-width: 560px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            z-index: 5;
+            position: relative;
+        }
+
+        .tree-panel-header {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            background: #fafbfc;
+        }
+
+        .tree-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .tree-actions .btn-sm {
+            font-size: 0.72rem;
+            padding: 4px 10px;
+            text-transform: none;
+            letter-spacing: 0.01em;
+            font-weight: 500;
+        }
+
+        .tree-scroll {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            padding: 10px 6px 20px 12px;
+            scroll-behavior: smooth;
+        }
+
+        .tree-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .tree-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .tree-scroll::-webkit-scrollbar-thumb {
+            background: #d0d5dc;
+            border-radius: 10px;
+        }
+        .tree-scroll::-webkit-scrollbar-thumb:hover {
+            background: #b0b8c2;
+        }
+
+        /* ── TREE STYLES ────────────────────── */
+        .tree-root {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .tree-root ul {
+            list-style: none;
+            padding-left: 20px;
+            margin: 0;
+            border-left: 1.5px solid #e8ecf1;
+            margin-left: 7px;
+        }
+
+        .tree-folder {
+            margin: 1px 0;
+        }
+
+        .tree-folder>summary {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px 7px 6px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            user-select: none;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            list-style: none;
+            position: relative;
+        }
+
+        .tree-folder>summary::-webkit-details-marker {
+            display: none;
+        }
+        .tree-folder>summary::marker {
+            display: none;
+            content: '';
+        }
+
+        .tree-folder>summary:hover {
+            background: var(--hover);
+        }
+
+        .tree-folder>summary .arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.6rem;
+            color: #8a94a3;
+        }
+
+        .tree-folder[open]>summary .arrow {
+            transform: rotate(90deg);
+            color: var(--accent);
+        }
+
+        .tree-folder>summary .folder-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+        .tree-folder[open]>summary .folder-icon {
+            filter: saturate(1.3);
+        }
+
+        .tree-folder>summary .folder-name {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .tree-folder>summary .badge {
+            font-size: 0.7rem;
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+            flex-shrink: 0;
+            letter-spacing: 0.02em;
+        }
+
+        .tree-file {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px 6px 26px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            user-select: none;
+            transition: var(--transition);
+            font-size: 0.88rem;
+            color: var(--text);
+            margin: 1px 0;
+            position: relative;
+        }
+
+        .tree-file:hover {
+            background: var(--hover);
+        }
+        .tree-file.active {
+            background: var(--selected);
+            color: var(--accent);
+            font-weight: 500;
+        }
+        .tree-file.active::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .tree-file .file-icon {
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            opacity: 0.8;
+        }
+        .tree-file.active .file-icon {
+            opacity: 1;
+        }
+
+        .tree-file .file-name {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: var(--mono);
+        }
+
+        /* ── PREVIEW PANEL ──────────────────── */
+        .preview-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fcfcfd;
+            overflow: hidden;
+            min-width: 300px;
+        }
+
+        .preview-header {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            background: #fafbfc;
+            letter-spacing: 0.02em;
+        }
+        .preview-header .path-display {
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            min-width: 0;
+        }
+        .preview-header .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #c5cdd8;
+            flex-shrink: 0;
+        }
+        .preview-header .dot.active {
+            background: #34c759;
+            box-shadow: 0 0 6px rgba(52, 199, 89, 0.4);
+        }
+
+        .preview-iframe-wrapper {
+            flex: 1;
+            position: relative;
+            background: #fff;
+        }
+
+        .preview-iframe-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+
+        .preview-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #bcc4d0;
+            pointer-events: none;
+            text-align: center;
+            gap: 10px;
+        }
+        .preview-placeholder .big-icon {
+            font-size: 4rem;
+            opacity: 0.5;
+        }
+        .preview-placeholder p {
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── EMPTY / INITIAL STATE ──────────── */
+        .initial-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 40px;
+            text-align: center;
+        }
+        .initial-state .big-icon {
+            font-size: 5rem;
+            opacity: 0.7;
+        }
+        .initial-state h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.2px;
+        }
+        .initial-state p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+        .initial-state .btn {
+            margin-top: 8px;
+            font-size: 1rem;
+            padding: 12px 24px;
+        }
+
+        /* ── RESPONSIVE ─────────────────────── */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .tree-panel {
+                width: 100%;
+                max-width: none;
+                max-height: 45vh;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .preview-panel {
+                min-height: 300px;
+            }
+            .header {
+                padding: 10px 14px;
+                gap: 8px;
+            }
+            .stats-pills {
+                margin-left: 0;
+            }
+            .header-logo {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tree-panel {
+                max-height: 38vh;
+            }
+            .btn {
+                padding: 7px 12px;
+                font-size: 0.8rem;
+            }
+            .btn-sm {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+            }
+            .stat-pill {
+                font-size: 0.7rem;
+                padding: 4px 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="ambient" aria-hidden="true">
-    <div class="ambient-grid"></div>
-    <div class="ambient-sweep"></div>
-  </div>
 
-  <header class="topbar">
-    <button class="brand-button" type="button" data-go="home" aria-label="Go to home">
-      <span class="brand-mark">ARIC</span>
-      <span class="brand-copy">Innovation Detective</span>
-    </button>
-    <nav class="top-nav" aria-label="Main sections">
-      <button type="button" data-go="detective">Detective</button>
-      <button type="button" data-go="mythbusters">Mythbusters</button>
-      <button type="button" data-go="impossible">Questions</button>
-      <button type="button" data-go="rabbit">Rabbit Hole</button>
-      <button type="button" data-go="vault">Vault</button>
-    </nav>
-    <div class="top-actions">
-      <span class="status-pill" id="curiosityPill">Curiosity 0</span>
-      <button class="ghost-button" type="button" id="randomChallenge">Random</button>
-      <button class="ghost-button" type="button" id="fullscreenBtn">Fullscreen</button>
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <header class="header">
+        <div class="header-logo">
+            <span class="icon">📁</span>
+            HTML Explorer
+        </div>
+        <button class="btn btn-primary" id="btnSelectFolder" title="Select a folder to scan for HTML files">
+            📂 Select Folder
+        </button>
+        <button class="btn btn-outline btn-sm" id="btnExpandAll" title="Expand all folders" disabled>
+            ⬇ Expand All
+        </button>
+        <button class="btn btn-outline btn-sm" id="btnCollapseAll" title="Collapse all folders" disabled>
+            ⬆ Collapse All
+        </button>
+        <div class="stats-pills" id="statsPills">
+            <span class="stat-pill" id="pillFolders" style="display:none;">📁 Folders: <strong>0</strong></span>
+            <span class="stat-pill" id="pillFiles" style="display:none;">📄 HTML Files: <strong>0</strong></span>
+        </div>
+        <!-- Hidden file input for folder selection -->
+        <input type="file" id="folderInput" webkitdirectory directory multiple
+        style="display:none;" accept=".html,.htm">
+    </header>
+
+    <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+    <div class="main-container" id="mainContainer">
+        <!-- Initial state (shown before folder selection) -->
+        <div class="initial-state" id="initialState">
+            <span class="big-icon">📂</span>
+            <h2>Scan a Folder for HTML Files</h2>
+            <p>
+                Click the button below to select a folder on your computer.
+                This tool will scan it recursively and display all
+                <strong>.html</strong> files in a hierarchical folder tree.
+            </p>
+            <button class="btn btn-primary" id="btnInitialSelect">
+                📂 Choose Folder to Scan
+            </button>
+            <p style="font-size:0.78rem;color:#a0aab4;">
+                Works with Chrome, Edge, Firefox, and other modern browsers.
+            </p>
+        </div>
+
+        <!-- Tree Panel (hidden initially) -->
+        <div class="tree-panel" id="treePanel" style="display:none;">
+            <div class="tree-panel-header">
+                <span>📁 Folder Structure</span>
+                <div class="tree-actions">
+                    <button class="btn btn-outline btn-sm" id="btnTreeExpandAll">Expand All</button>
+                    <button class="btn btn-outline btn-sm" id="btnTreeCollapseAll">Collapse All</button>
+                </div>
+            </div>
+            <div class="tree-scroll" id="treeScroll">
+                <ul class="tree-root" id="treeRoot"></ul>
+            </div>
+        </div>
+
+        <!-- Preview Panel (hidden initially) -->
+        <div class="preview-panel" id="previewPanel" style="display:none;">
+            <div class="preview-header">
+                <span class="dot" id="previewDot"></span>
+                <span class="path-display" id="previewPath">No file selected</span>
+                <button class="btn btn-outline btn-sm" id="btnOpenNewTab" disabled
+                title="Open this HTML file in a new tab">
+                🔗 Open in New Tab
+            </button>
+        </div>
+        <div class="preview-iframe-wrapper" id="previewWrapper">
+            <iframe id="previewIframe" sandbox="allow-scripts allow-same-origin"
+            title="HTML Preview"></iframe>
+            <div class="preview-placeholder" id="previewPlaceholder">
+                <span class="big-icon">👈</span>
+                <p>Select an HTML file from the tree to preview it here</p>
+            </div>
+        </div>
     </div>
-  </header>
+</div>
 
-  <main id="app">
-    <section class="screen active" id="home" aria-labelledby="homeTitle">
-      <div class="home-grid">
-        <div class="home-hero">
-          <p class="eyebrow">Applied Research and Innovation Club Showcase</p>
-          <h1 id="homeTitle">INNOVATION DETECTIVE</h1>
-          <p class="subtitle">Every innovation began with a question.</p>
-          <div class="hero-actions" aria-label="Start modules">
-            <button class="launch-button primary" type="button" data-go="detective">Start Detective</button>
-            <button class="launch-button" type="button" data-go="mythbusters">Mythbusters</button>
-            <button class="launch-button" type="button" data-go="impossible">Impossible Questions</button>
-            <button class="launch-button" type="button" data-go="rabbit">Rabbit Hole Explorer</button>
-            <button class="launch-button" type="button" data-go="vault">Question Vault</button>
-          </div>
-        </div>
-        <aside class="feature-panel">
-          <p class="panel-label">Daily Featured Question</p>
-          <h2 id="dailyQuestion">Would you upload your mind into a computer?</h2>
-          <div class="signal-row">
-            <div>
-              <span class="metric-value" id="statCards">150</span>
-              <span class="metric-label">detective cases</span>
-            </div>
-            <div>
-              <span class="metric-value" id="statMyths">100</span>
-              <span class="metric-label">myths</span>
-            </div>
-            <div>
-              <span class="metric-value" id="statQuestions">200</span>
-              <span class="metric-label">questions</span>
-            </div>
-          </div>
-          <div class="dashboard">
-            <div class="dash-tile">
-              <span id="dashCuriosity">0</span>
-              <small>curiosity taps</small>
-            </div>
-            <div class="dash-tile">
-              <span id="dashMyths">0</span>
-              <small>myths answered</small>
-            </div>
-            <div class="dash-tile">
-              <span id="dashVault">0</span>
-              <small>vault questions</small>
-            </div>
-          </div>
-        </aside>
-      </div>
-    </section>
+<script>
+    (function() {
+        // ── DOM ELEMENTS ──────────────────────
+        const folderInput = document.getElementById('folderInput');
+        const btnSelectFolder = document.getElementById('btnSelectFolder');
+        const btnInitialSelect = document.getElementById('btnInitialSelect');
+        const btnExpandAll = document.getElementById('btnExpandAll');
+        const btnCollapseAll = document.getElementById('btnCollapseAll');
+        const btnTreeExpandAll = document.getElementById('btnTreeExpandAll');
+        const btnTreeCollapseAll = document.getElementById('btnTreeCollapseAll');
+        const btnOpenNewTab = document.getElementById('btnOpenNewTab');
+        const initialState = document.getElementById('initialState');
+        const treePanel = document.getElementById('treePanel');
+        const previewPanel = document.getElementById('previewPanel');
+        const treeRoot = document.getElementById('treeRoot');
+        const treeScroll = document.getElementById('treeScroll');
+        const previewIframe = document.getElementById('previewIframe');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        const previewPath = document.getElementById('previewPath');
+        const previewDot = document.getElementById('previewDot');
+        const pillFolders = document.getElementById('pillFolders');
+        const pillFiles = document.getElementById('pillFiles');
+        const statsPills = document.getElementById('statsPills');
 
-    <section class="screen" id="detective" aria-labelledby="detectiveTitle">
-      <div class="module-header">
-        <div>
-          <p class="eyebrow">Module 1</p>
-          <h2 id="detectiveTitle">Innovation Detective</h2>
-        </div>
-        <div class="module-meta">
-          <span id="detectiveCounter">1 / 150</span>
-          <span id="detectiveScore">Score 0 : 0</span>
-        </div>
-      </div>
-      <div class="filter-strip" id="categoryFilters" aria-label="Detective category filters"></div>
-      <div class="detective-layout">
-        <div class="cue-stage" aria-label="Innovation problem cue">
-          <div class="cue-badge" id="detectiveCategory">Technology</div>
-          <div class="cue-emoji" id="detectiveEmoji" aria-hidden="true">💡</div>
-          <p class="cue-label">Problem Cue</p>
-          <h3 id="detectiveCue">A problem needed a clever solution.</h3>
-          <p class="cue-sub" id="detectiveCueSub">Guess the innovation before revealing the case.</p>
-        </div>
-        <article class="detective-card" id="detectiveCard">
-          <div class="question-face">
-            <p class="prompt-kicker">Case File</p>
-            <h3>What innovation solved this problem?</h3>
-            <p class="case-hint" id="caseHint">Read the cue. Guess the invention before revealing the case notes.</p>
-          </div>
-          <div class="reveal-face">
-            <p class="prompt-kicker">Case Solved</p>
-            <h3 id="revealName">Product Name</h3>
-            <dl class="reveal-list">
-              <div>
-                <dt>Problem Solved</dt>
-                <dd id="revealProblem"></dd>
-              </div>
-              <div>
-                <dt>Historical Context</dt>
-                <dd id="revealContext"></dd>
-              </div>
-              <div>
-                <dt>Why It Was Innovative</dt>
-                <dd id="revealInnovation"></dd>
-              </div>
-              <div>
-                <dt>Impact on Society</dt>
-                <dd id="revealImpact"></dd>
-              </div>
-            </dl>
-          </div>
-        </article>
-      </div>
-      <div class="control-dock">
-        <button type="button" id="detectiveReveal">Reveal</button>
-        <button type="button" id="detectiveGotIt">Got It</button>
-        <button type="button" id="detectiveMissed">Missed</button>
-        <button type="button" id="detectiveRandom">Random Card</button>
-        <button type="button" id="detectiveNext">Next Card</button>
-      </div>
-    </section>
+        // ── STATE ────────────────────────────
+        let allHtmlFiles = []; // Array of { path: string, file: File }
+        let folderTree = null; // Root folder node
+        let totalFolders = 0;
+        let selectedFilePath = null;
+        let fileMap = {}; // Map from webkitRelativePath -> File object
+        let blobUrlMap = {}; // Map from path -> blob URL for "Open in New Tab"
 
-    <section class="screen" id="mythbusters" aria-labelledby="mythTitle">
-      <div class="module-header">
-        <div>
-          <p class="eyebrow">Module 2</p>
-          <h2 id="mythTitle">Mythbusters</h2>
-        </div>
-        <div class="module-meta">
-          <span id="mythCounter">1 / 100</span>
-          <span id="mythScore">Score 0 / 0</span>
-        </div>
-      </div>
-      <article class="myth-card">
-        <p class="prompt-kicker">True or False</p>
-        <h3 id="mythStatement">Humans use only 10% of their brain.</h3>
-        <div class="binary-actions">
-          <button type="button" id="mythTrue">TRUE</button>
-          <button type="button" id="mythFalse">FALSE</button>
-        </div>
-        <div class="myth-result" id="mythResult" aria-live="polite">
-          <strong id="mythAnswer"></strong>
-          <p id="mythExplanation"></p>
-        </div>
-      </article>
-      <div class="control-dock">
-        <button type="button" id="mythNext">Next Myth</button>
-        <button type="button" id="mythRandom">Random Myth</button>
-        <button type="button" id="mythMode">Random Mode: Off</button>
-      </div>
-    </section>
+        // ── EVENT LISTENERS ──────────────────
+        btnSelectFolder.addEventListener('click', () => folderInput.click());
+        if (btnInitialSelect) {
+            btnInitialSelect.addEventListener('click', () => folderInput.click());
+        }
+        folderInput.addEventListener('change', handleFolderSelected);
 
-    <section class="screen impossible-screen" id="impossible" aria-labelledby="impossibleTitle">
-      <div class="module-header floating-header">
-        <div>
-          <p class="eyebrow">Module 3</p>
-          <h2 id="impossibleTitle">Impossible Questions</h2>
-        </div>
-        <div class="module-meta">
-          <span id="impossibleCounter">1 / 200</span>
-          <span id="impossibleStatus">Auto-loop</span>
-        </div>
-      </div>
-      <div class="question-stage">
-        <p class="prompt-kicker">Think Fast</p>
-        <h3 id="impossibleQuestion">Would you upload your mind into a computer?</h3>
-      </div>
-      <div class="control-dock floating-dock">
-        <button type="button" id="impossiblePrev">Previous</button>
-        <button type="button" id="impossibleNext">Next</button>
-        <button type="button" id="impossiblePause">Pause</button>
-        <button type="button" id="presentationMode">Presentation Mode</button>
-      </div>
-    </section>
+        btnExpandAll.addEventListener('click', expandAllFolders);
+        btnCollapseAll.addEventListener('click', collapseAllFolders);
+        btnTreeExpandAll.addEventListener('click', expandAllFolders);
+        btnTreeCollapseAll.addEventListener('click', collapseAllFolders);
+        btnOpenNewTab.addEventListener('click', openSelectedInNewTab);
 
-    <section class="screen" id="rabbit" aria-labelledby="rabbitTitle">
-      <div class="module-header">
-        <div>
-          <p class="eyebrow">Module 4</p>
-          <h2 id="rabbitTitle">Rabbit Hole Explorer</h2>
-        </div>
-        <div class="module-meta">
-          <span id="rabbitCounter">1 / 30</span>
-          <span id="rabbitTopicLabel">AI</span>
-        </div>
-      </div>
-      <div class="topic-strip" id="topicStrip" aria-label="Rabbit hole topics"></div>
-      <article class="rabbit-card">
-        <p class="prompt-kicker" id="rabbitTopic">AI</p>
-        <h3 id="rabbitFact">Dolphins have names for one another.</h3>
-      </article>
-      <div class="control-dock">
-        <button type="button" id="rabbitPrev">Previous</button>
-        <button type="button" id="rabbitNext">Next</button>
-        <button type="button" id="rabbitRandom">Random</button>
-      </div>
-    </section>
+        // ── KEYBOARD SHORTCUTS ───────────────
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                e.preventDefault();
+                expandAllFolders();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
+                e.preventDefault();
+                collapseAllFolders();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+                e.preventDefault();
+                folderInput.click();
+            }
+        });
 
-    <section class="screen" id="vault" aria-labelledby="vaultTitle">
-      <div class="module-header">
-        <div>
-          <p class="eyebrow">Module 5</p>
-          <h2 id="vaultTitle">Question Vault</h2>
-        </div>
-        <div class="module-meta">
-          <span id="vaultCount">0 stored</span>
-          <span>Local only</span>
-        </div>
-      </div>
-      <div class="vault-layout">
-        <form class="vault-form" id="questionForm">
-          <label for="questionInput">What is the most interesting question you have ever thought about?</label>
-          <textarea id="questionInput" rows="5" maxlength="220" placeholder="Type a question that could start a research project..."></textarea>
-          <div class="form-row">
-            <span id="questionLimit">0 / 220</span>
-            <button type="submit">Submit Question</button>
-          </div>
-        </form>
-        <div class="vault-column">
-          <section class="vault-panel">
-            <h3>Recent Questions</h3>
-            <div class="question-list" id="recentQuestions"></div>
-          </section>
-          <section class="vault-panel">
-            <h3>Top Liked</h3>
-            <div class="question-list compact" id="topQuestions"></div>
-          </section>
-        </div>
-      </div>
-      <section class="question-wall" aria-labelledby="wallTitle">
-        <div class="wall-header">
-          <h3 id="wallTitle">Random Question Wall</h3>
-          <button type="button" id="shuffleWall">Shuffle Wall</button>
-        </div>
-        <div class="wall-grid" id="randomWall"></div>
-      </section>
-    </section>
-  </main>
+        // ── HANDLE FOLDER SELECTION ──────────
+        function handleFolderSelected(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js"></script>
+            // Reset state
+            allHtmlFiles = [];
+            fileMap = {};
+            blobUrlMap = {};
+            selectedFilePath = null;
+            folderTree = null;
+            totalFolders = 0;
+
+            // Revoke old blob URLs
+            Object.values(blobUrlMap).forEach(url => {
+                try { URL.revokeObjectURL(url); } catch (e) { /* ignore */ }
+            });
+            blobUrlMap = {};
+
+            // Collect all .html files
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const relativePath = file.webkitRelativePath || file.name;
+                if (isHtmlFile(relativePath)) {
+                    allHtmlFiles.push({ path: relativePath, file: file });
+                    fileMap[relativePath] = file;
+                }
+            }
+
+            // Sort by path
+            allHtmlFiles.sort((a, b) => a.path.localeCompare(b.path, undefined, { sensitivity: 'base' }));
+
+            if (allHtmlFiles.length === 0) {
+                alert(
+                    'No .html files found in the selected folder or its subdirectories.\n\nPlease select a folder that contains HTML files.');
+                resetToInitialState();
+                return;
+            }
+
+            // Build folder tree
+            folderTree = buildFolderTree(allHtmlFiles);
+            totalFolders = countFolders(folderTree);
+
+            // Render
+            renderTree(folderTree, treeRoot);
+            updateStats();
+            showExplorerMode();
+
+            // Auto-select first file for preview
+            if (allHtmlFiles.length > 0) {
+                selectFileByPath(allHtmlFiles[0].path);
+            }
+
+            // Reset the input so the same folder can be re-selected
+            folderInput.value = '';
+        }
+
+        function isHtmlFile(path) {
+            const lower = path.toLowerCase();
+            return lower.endsWith('.html') || lower.endsWith('.htm');
+        }
+
+        // ── BUILD FOLDER TREE ────────────────
+        function buildFolderTree(htmlFiles) {
+            const root = {
+                name: 'root',
+                type: 'folder',
+                children: {},
+                fileCount: 0,
+            };
+
+            for (const { path, file } of htmlFiles) {
+                const parts = path.split('/');
+                let current = root;
+
+                // Navigate/create folder structure for all parts except the last (the file)
+                for (let i = 0; i < parts.length - 1; i++) {
+                    const folderName = parts[i];
+                    if (!current.children[folderName]) {
+                        current.children[folderName] = {
+                            name: folderName,
+                            type: 'folder',
+                            children: {},
+                            fileCount: 0,
+                        };
+                    }
+                    current = current.children[folderName];
+                }
+
+                // Add the file
+                const fileName = parts[parts.length - 1];
+                current.children[fileName] = {
+                    name: fileName,
+                    type: 'file',
+                    path: path,
+                    file: file,
+                };
+                current.fileCount++;
+            }
+
+            // Propagate file counts up the tree
+            propagateFileCounts(root);
+
+            return root;
+        }
+
+        function propagateFileCounts(node) {
+            if (node.type === 'file') return node.fileCount || 0;
+            let count = 0;
+            for (const child of Object.values(node.children)) {
+                if (child.type === 'file') {
+                    count += 1;
+                } else {
+                    count += propagateFileCounts(child);
+                }
+            }
+            node.fileCount = count;
+            return count;
+        }
+
+        function countFolders(node) {
+            let count = 0;
+            for (const child of Object.values(node.children)) {
+                if (child.type === 'folder') {
+                    count += 1 + countFolders(child);
+                }
+            }
+            return count;
+        }
+
+        // ── RENDER TREE ──────────────────────
+        function renderTree(node, containerElement) {
+            containerElement.innerHTML = '';
+
+            // Get sorted children: folders first, then files, both alphabetically
+            const children = Object.values(node.children);
+            const folders = children
+                .filter(c => c.type === 'folder')
+                .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+            const files = children
+                .filter(c => c.type === 'file')
+                .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+            const sortedChildren = [...folders, ...files];
+
+            for (const child of sortedChildren) {
+                if (child.type === 'folder') {
+                    const details = document.createElement('details');
+                    details.classList.add('tree-folder');
+                    details.open = true; // Expanded by default
+
+                    const summary = document.createElement('summary');
+                    summary.innerHTML = `
+                                <span class="arrow">▶</span>
+                                <span class="folder-icon">📁</span>
+                                <span class="folder-name">${escapeHtml(child.name)}</span>
+                                <span class="badge">${child.fileCount} file${child.fileCount !== 1 ? 's' : ''}</span>
+                            `;
+                    details.appendChild(summary);
+
+                    const ul = document.createElement('ul');
+                    renderTree(child, ul);
+                    details.appendChild(ul);
+
+                    // Update folder icon on toggle
+                    details.addEventListener('toggle', () => {
+                        const icon = details.querySelector('.folder-icon');
+                        if (details.open) {
+                            icon.textContent = '📂';
+                        } else {
+                            icon.textContent = '📁';
+                        }
+                    });
+                    // Set initial icon
+                    const icon = details.querySelector('.folder-icon');
+                    icon.textContent = '📂';
+
+                    containerElement.appendChild(details);
+                } else if (child.type === 'file') {
+                    const li = document.createElement('li');
+                    li.classList.add('tree-file');
+                    li.dataset.path = child.path;
+                    li.innerHTML = `
+                                <span class="file-icon">📄</span>
+                                <span class="file-name">${escapeHtml(child.name)}</span>
+                            `;
+                    li.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectFileByPath(child.path);
+                    });
+                    containerElement.appendChild(li);
+                }
+            }
+
+            // If container is the root and has no children, show a message
+            if (containerElement === treeRoot && sortedChildren.length === 0) {
+                const li = document.createElement('li');
+                li.style.cssText = 'padding: 20px; text-align: center; color: #a0aab4; font-style: italic;';
+                li.textContent = 'No HTML files found.';
+                containerElement.appendChild(li);
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ── FILE SELECTION & PREVIEW ──────────
+        function selectFileByPath(path) {
+            selectedFilePath = path;
+            const file = fileMap[path];
+            if (!file) return;
+
+            // Update tree highlighting
+            document.querySelectorAll('.tree-file').forEach(el => {
+                el.classList.remove('active');
+                if (el.dataset.path === path) {
+                    el.classList.add('active');
+                    // Scroll into view
+                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+
+            // Update preview header
+            previewPath.textContent = path;
+            previewDot.classList.add('active');
+            btnOpenNewTab.disabled = false;
+
+            // Read and display file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                previewIframe.srcdoc = content;
+                previewPlaceholder.style.display = 'none';
+                previewIframe.style.display = 'block';
+            };
+            reader.onerror = function() {
+                previewIframe.srcdoc =
+                    '<html><body style="font-family:sans-serif;padding:20px;color:#c0392b;"><p>⚠️ Error reading file. It may be too large or inaccessible.</p></body></html>';
+                previewPlaceholder.style.display = 'none';
+                previewIframe.style.display = 'block';
+            };
+            reader.readAsText(file);
+        }
+
+        function openSelectedInNewTab() {
+            if (!selectedFilePath) return;
+            const file = fileMap[selectedFilePath];
+            if (!file) return;
+
+            // Use cached blob URL or create a new one
+            if (!blobUrlMap[selectedFilePath]) {
+                const blob = new Blob([file], { type: 'text/html' });
+                blobUrlMap[selectedFilePath] = URL.createObjectURL(blob);
+            }
+            window.open(blobUrlMap[selectedFilePath], '_blank', 'noopener,noreferrer');
+        }
+
+        // ── EXPAND / COLLAPSE ALL ────────────
+        function expandAllFolders() {
+            const allDetails = document.querySelectorAll('#treeRoot details.tree-folder');
+            allDetails.forEach(d => {
+                d.open = true;
+                const icon = d.querySelector('.folder-icon');
+                if (icon) icon.textContent = '📂';
+            });
+        }
+
+        function collapseAllFolders() {
+            const allDetails = document.querySelectorAll('#treeRoot details.tree-folder');
+            // Collapse from deepest to shallowest for smooth visual effect
+            const depthSorted = Array.from(allDetails).sort((a, b) => {
+                return getDepth(b) - getDepth(a);
+            });
+            depthSorted.forEach(d => {
+                d.open = false;
+                const icon = d.querySelector('.folder-icon');
+                if (icon) icon.textContent = '📁';
+            });
+        }
+
+        function getDepth(element) {
+            let depth = 0;
+            let current = element;
+            while (current) {
+                if (current.tagName === 'DETAILS' && current.classList.contains('tree-folder')) {
+                    depth++;
+                }
+                current = current.parentElement?.closest('details.tree-folder') || null;
+            }
+            return depth;
+        }
+
+        // ── UI STATE MANAGEMENT ──────────────
+        function showExplorerMode() {
+            initialState.style.display = 'none';
+            treePanel.style.display = 'flex';
+            previewPanel.style.display = 'flex';
+            btnExpandAll.disabled = false;
+            btnCollapseAll.disabled = false;
+            updateStats();
+        }
+
+        function resetToInitialState() {
+            initialState.style.display = 'flex';
+            treePanel.style.display = 'none';
+            previewPanel.style.display = 'none';
+            btnExpandAll.disabled = true;
+            btnCollapseAll.disabled = true;
+            btnOpenNewTab.disabled = true;
+            pillFolders.style.display = 'none';
+            pillFiles.style.display = 'none';
+            previewPath.textContent = 'No file selected';
+            previewDot.classList.remove('active');
+            previewIframe.srcdoc = '';
+            previewIframe.style.display = 'none';
+            previewPlaceholder.style.display = 'flex';
+            treeRoot.innerHTML = '';
+            selectedFilePath = null;
+            allHtmlFiles = [];
+            fileMap = {};
+            folderTree = null;
+            totalFolders = 0;
+            // Clean up blob URLs
+            Object.values(blobUrlMap).forEach(url => {
+                try { URL.revokeObjectURL(url); } catch (e) { /* ignore */ }
+            });
+            blobUrlMap = {};
+        }
+
+        function updateStats() {
+            if (allHtmlFiles.length > 0) {
+                pillFolders.style.display = 'inline-flex';
+                pillFiles.style.display = 'inline-flex';
+                pillFolders.innerHTML = '📁 Folders: <strong>' + totalFolders + '</strong>';
+                pillFiles.innerHTML = '📄 HTML Files: <strong>' + allHtmlFiles.length + '</strong>';
+            } else {
+                pillFolders.style.display = 'none';
+                pillFiles.style.display = 'none';
+            }
+        }
+
+        // ── INITIALIZATION ────────────────────
+        // Ensure the app starts in the initial state
+        resetToInitialState();
+
+        // Log info
+        console.log('🌐 HTML File Explorer ready.');
+        console.log('   📂 Click "Select Folder" to scan a directory for .html files.');
+        console.log('   ⌨️  Shortcuts: Ctrl+O = Open folder, Ctrl+E = Expand all, Ctrl+W = Collapse all');
+        console.log('   📄 The tree shows folder hierarchy with .html files only.');
+        console.log('   👆 Click any .html file to preview it in the right panel.');
+    })();
+</script>
 </body>
 </html>
