@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The OCR Manual — Kritak's Field Guide to ML, CV & NLP</title>
+<style>
+  :root {
+    --bg: #0f0f10;
+    --surface: #1a1a1c;
+    --surface2: #222225;
+    --border: rgba(255,255,255,0.08);
+    --text: #e8e6e0;
+    --muted: #888681;
+    --accent: #7c6af7;
+    --accent2: #3ecfa4;
+    --accent3: #f0954a;
+    --red: #e05a5a;
+    --mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    --sans: -apple-system, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.75; }
+
+  .layout { display: flex; min-height: 100vh; }
+
+  nav {
+    width: 260px; min-width: 260px; background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed; top: 0; left: 0; height: 100vh;
+    overflow-y: auto; padding: 1.5rem 0;
+  }
+  nav .logo {
+    padding: 0 1.25rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  nav .logo-title { font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+  nav .logo-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  nav .section-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 0.75rem 1.25rem 0.25rem;
+  }
+  nav a {
+    display: block; padding: 0.35rem 1.25rem;
+    font-size: 13px; color: var(--muted); text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  nav a:hover { color: var(--text); }
+  nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(124,106,247,0.07); }
+
+  main { margin-left: 260px; max-width: 860px; padding: 3rem 3rem 6rem; }
+
+  h1 { font-size: 2rem; font-weight: 700; line-height: 1.2; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.35rem; font-weight: 600; margin: 2.5rem 0 0.75rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text); }
+  h3 { font-size: 1.05rem; font-weight: 600; margin: 1.75rem 0 0.5rem; color: var(--accent2); }
+  h4 { font-size: 0.9rem; font-weight: 600; margin: 1.25rem 0 0.4rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  p { margin-bottom: 1rem; color: var(--text); }
+  ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+  li { margin-bottom: 0.35rem; }
+  strong { color: var(--text); font-weight: 600; }
+  em { color: var(--accent3); font-style: normal; }
+
+  code {
+    font-family: var(--mono); font-size: 0.82em;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    border-radius: 4px; padding: 0.1em 0.4em; color: var(--accent2);
+  }
+  pre {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem; overflow-x: auto;
+    margin: 1rem 0 1.5rem; position: relative;
+  }
+  pre code {
+    background: none; border: none; padding: 0; font-size: 0.85em;
+    color: #c9c5bb; line-height: 1.65;
+  }
+  .code-label {
+    position: absolute; top: 0.5rem; right: 0.75rem;
+    font-size: 10px; color: var(--muted); font-family: var(--mono);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, rgba(124,106,247,0.12), rgba(62,207,164,0.08));
+    border: 1px solid rgba(124,106,247,0.25); border-radius: 12px;
+    padding: 2rem; margin-bottom: 3rem;
+  }
+  .hero p { color: var(--muted); margin-bottom: 0; }
+
+  .callout {
+    border-left: 3px solid var(--accent); background: rgba(124,106,247,0.07);
+    border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1.25rem 0;
+  }
+  .callout.green { border-color: var(--accent2); background: rgba(62,207,164,0.07); }
+  .callout.amber { border-color: var(--accent3); background: rgba(240,149,74,0.07); }
+  .callout.red { border-color: var(--red); background: rgba(224,90,90,0.07); }
+  .callout p { margin-bottom: 0; font-size: 14px; }
+  .callout-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.green .callout-title { color: var(--accent2); }
+  .callout.amber .callout-title { color: var(--accent3); }
+  .callout.red .callout-title { color: var(--red); }
+  .callout > .callout-title + p { margin-top: 0; }
+
+  .epoch-table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 13px; }
+  .epoch-table th { text-align: left; padding: 0.5rem 0.75rem; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .epoch-table td { padding: 0.45rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .epoch-table tr:last-child td { border-bottom: none; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 4px; padding: 0.15em 0.5em; }
+  .tag-purple { background: rgba(124,106,247,0.18); color: var(--accent); }
+  .tag-green { background: rgba(62,207,164,0.15); color: var(--accent2); }
+  .tag-amber { background: rgba(240,149,74,0.15); color: var(--accent3); }
+
+  .pipeline {
+    display: flex; align-items: center; gap: 0; margin: 1.5rem 0; flex-wrap: wrap;
+  }
+  .pipe-step {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.6rem 1rem; font-size: 13px;
+    font-weight: 500; text-align: center; min-width: 100px;
+  }
+  .pipe-arrow { color: var(--muted); padding: 0 0.4rem; font-size: 18px; }
+  .pipe-step.active { border-color: var(--accent); color: var(--accent); background: rgba(124,106,247,0.1); }
+
+  section { margin-bottom: 1rem; }
+  .page { display: none; }
+  .page.visible { display: block; }
+
+  .toc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .toc-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1.25rem; cursor: pointer; transition: border-color 0.15s;
+    text-decoration: none; color: inherit;
+  }
+  .toc-card:hover { border-color: var(--accent); }
+  .toc-card-num { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+  .toc-card-title { font-size: 15px; font-weight: 600; margin-bottom: 0.25rem; }
+  .toc-card-desc { font-size: 13px; color: var(--muted); }
+
+  @media (max-width: 768px) {
+    nav { display: none; }
+    main { margin-left: 0; padding: 1.5rem; }
+    .toc-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<nav id="sidebar">
+  <div class="logo">
+    <div class="logo-title">OCR Manual</div>
+    <div class="logo-sub">Kritak's field guide</div>
+  </div>
+
+  <div class="section-label">Start here</div>
+  <a href="#" onclick="show('home')" class="active" id="nav-home">Overview</a>
+
+  <div class="section-label">Part 1 — Your notebook</div>
+  <a href="#" onclick="show('cells')" id="nav-cells">The cell-by-cell guide</a>
+  <a href="#" onclick="show('pipeline')" id="nav-pipeline">How data flows</a>
+  <a href="#" onclick="show('training')" id="nav-training">Reading your training logs</a>
+
+  <div class="section-label">Part 2 — The concepts</div>
+  <a href="#" onclick="show('cnn')" id="nav-cnn">What CNNs actually do</a>
+  <a href="#" onclick="show('rnn')" id="nav-rnn">Sequences & RNNs</a>
+  <a href="#" onclick="show('ctc')" id="nav-ctc">CTC loss explained</a>
+  <a href="#" onclick="show('transfer')" id="nav-transfer">Transfer learning</a>
+
+  <div class="section-label">Part 3 — Industry</div>
+  <a href="#" onclick="show('industry')" id="nav-industry">How real products are built</a>
+  <a href="#" onclick="show('resources')" id="nav-resources">What to learn next</a>
+</nav>
+
+<main>
+
+<!-- HOME -->
+<div class="page visible" id="page-home">
+  <div class="hero">
+    <h1>The OCR Manual</h1>
+    <p style="margin-top:0.5rem; font-size:16px; color:var(--text);">A practical field guide to what you're building, how it works, and how it connects to real ML engineering — written for the specific notebook running right now on Kaggle.</p>
+    <p style="margin-top:0.75rem;">No prior ML experience assumed. The magic disappears here.</p>
+  </div>
+
+  <h2>What this manual covers</h2>
+  <div class="toc-grid">
+    <div class="toc-card" onclick="show('cells')">
+      <div class="toc-card-num">Part 1A</div>
+      <div class="toc-card-title">Cell-by-cell guide</div>
+      <div class="toc-card-desc">Every cell in your notebook — what it does, why it exists, what breaks if you remove it.</div>
+    </div>
+    <div class="toc-card" onclick="show('training')">
+      <div class="toc-card-num">Part 1B</div>
+      <div class="toc-card-title">Reading your training logs</div>
+      <div class="toc-card-desc">What loss, val_acc, CER actually mean — and how to know if training is healthy.</div>
+    </div>
+    <div class="toc-card" onclick="show('ctc')">
+      <div class="toc-card-num">Part 2A</div>
+      <div class="toc-card-title">CTC loss explained</div>
+      <div class="toc-card-desc">The hardest concept in your notebook — made simple with a concrete example.</div>
+    </div>
+    <div class="toc-card" onclick="show('industry')">
+      <div class="toc-card-num">Part 3</div>
+      <div class="toc-card-title">How industry builds this</div>
+      <div class="toc-card-desc">From raw problem to production system — what real ML engineers actually do all day.</div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <div class="callout-title">Where you are right now</div>
+    <p>Training is running on Kaggle. At epoch 21 you hit 57.88% val_acc with a CER of 0.379. Every metric has improved every epoch. The model is working. This manual helps you understand <em>why</em>.</p>
+  </div>
+</div>
+
+<!-- CELLS -->
+<div class="page" id="page-cells">
+  <h1>Cell-by-cell guide</h1>
+  <p>Your notebook has 13 cells. Here's what every one does in plain English, and why it matters.</p>
+
+  <h2>Cell 1 — GPU check</h2>
+  <pre><code>import torch
+print("CUDA available:", torch.cuda.is_available())
+print("GPU:", torch.cuda.get_device_name(0))</code><span class="code-label">python</span></pre>
+  <p><strong>What it does:</strong> Confirms the GPU is visible and accessible from Python. Nothing will train without this being True.</p>
+  <p><strong>Why it matters:</strong> A CPU trains ~20× slower than a GPU for this kind of work. The GPU handles thousands of math operations simultaneously — that's what makes deep learning tractable at all.</p>
+  <div class="callout amber">
+    <div class="callout-title">Industry parallel</div>
+    <p>In production, this check is automated. Before a training job starts on cloud infrastructure (AWS SageMaker, Google Cloud AI Platform), the system verifies GPU allocation and fails fast if something's wrong — rather than waiting hours to discover the job ran on CPU.</p>
+  </div>
+
+  <h2>Cell 2 — Find the dataset</h2>
+  <pre><code>ROOT = Path('/kaggle/input/datasets/sabarinathan/...')
+csv_files = list(ROOT.rglob('*.csv'))</code><span class="code-label">python</span></pre>
+  <p><strong>What it does:</strong> Locates the actual files on disk. Uses <code>rglob</code> to recursively search the mounted dataset directory for CSV files (your label files).</p>
+  <p><strong>Why paths matter so much:</strong> Kaggle mounts datasets at a specific path that isn't always obvious. You spent significant debugging time on this — and that's normal. Path resolution is one of the most common sources of frustration in ML engineering, especially when moving code between environments (your laptop → Kaggle → production server).</p>
+
+  <h2>Cell 3 — Load and inspect CSVs</h2>
+  <pre><code>df = pd.read_csv(csv_files[0])
+print(df.head())</code><span class="code-label">python</span></pre>
+  <p><strong>What it does:</strong> Reads your label files into a DataFrame. Each row is one training example: a relative image path and the correct text label for that image.</p>
+  <p><strong>Your dataset structure:</strong></p>
+  <ul>
+    <li><code>train.csv</code> → 69,853 rows (the model learns from these)</li>
+    <li><code>val.csv</code> → 12,708 rows (used to check if learning generalises)</li>
+    <li><code>test.csv</code> → 12,869 rows (final evaluation only — never seen during training)</li>
+  </ul>
+  <div class="callout">
+    <div class="callout-title">Why three splits?</div>
+    <p>Train/val/test is a fundamental ML pattern. The model only sees train data during learning. Val data is checked after every epoch to catch overfitting early. Test data is held back entirely and only used once — at the very end — to give an honest estimate of real-world performance. Using val data to make training decisions "contaminates" it slightly, which is why you need a separate test set.</p>
+  </div>
+
+  <h2>Cell 4 — Verify one image loads</h2>
+  <p><strong>What it does:</strong> Takes the very first row from train.csv, builds the full path, opens the image, and displays it with matplotlib. A simple smoke test before building the full data pipeline.</p>
+  <p><strong>Why this step exists:</strong> You caught a real bug here — the path had an unexpected doubled <code>HindiSeg/HindiSeg</code> folder structure. Catching this on one image saved you from discovering it after wasting hours of training on an empty dataset.</p>
+
+  <h2>Cell 5 — Configuration</h2>
+  <pre><code>BASE_DIR  = ROOT / 'HindiSeg' / 'HindiSeg'
+TRAIN_CSV = ROOT / 'train.csv'
+IMG_H, IMG_W = 32, 128
+BATCH_SIZE = 64
+EPOCHS = 40
+LR = 1e-5</code><span class="code-label">python</span></pre>
+  <p><strong>What it does:</strong> Defines every hyperparameter in one place. This is a deliberate design pattern — centralising config so you can change one number and have it propagate everywhere, rather than hunting through code.</p>
+  <p><strong>Key choices and why:</strong></p>
+  <ul>
+    <li><code>IMG_H=32, IMG_W=128</code> — Every image is resized to exactly 32 pixels tall × 128 wide. The height becomes the CNN's feature dimension; the width becomes the sequence length the RNN reads.</li>
+    <li><code>BATCH_SIZE=64</code> — Process 64 images at once. Larger batches are faster but use more GPU memory. 64 is a standard safe choice for T4s.</li>
+    <li><code>LR=1e-5</code> — Learning rate: how big a step to take during each weight update. Too high → overshoots. Too low → trains forever. Your notebook uses a very low LR because VGG16's features are frozen — only the BiLSTM is learning.</li>
+  </ul>
+
+  <h2>Cell 6 — Imports</h2>
+  <p><strong>What it does:</strong> Loads all the Python libraries the notebook needs. Nothing interesting here — but worth knowing what each does:</p>
+  <ul>
+    <li><code>torch</code> / <code>torch.nn</code> — PyTorch: the deep learning framework. Handles tensors, autograd (automatic gradient calculation), and GPU computation.</li>
+    <li><code>torchvision.models</code> — Pre-trained computer vision models, including VGG16.</li>
+    <li><code>PIL</code> — Opens and manipulates images.</li>
+    <li><code>pandas</code> — Reads and manipulates your CSV files.</li>
+  </ul>
+
+  <h2>Cell 7 — Build vocabulary and load pairs</h2>
+  <pre><code>def load_pairs(csv_path, base_dir):
+    pairs = []
+    for _, row in df.iterrows():
+        img_path = base_dir / row[path_col]
+        if img_path.exists():
+            pairs.append((img_path, row[label_col]))
+    return pairs
+
+vocab = sorted(set(ch for _, label in all_pairs for ch in label))
+char2idx = {ch: i+1 for i, ch in enumerate(vocab)}
+idx2char = {i: ch for ch, i in char2idx.items()}</code><span class="code-label">python</span></pre>
+  <p><strong>What it does:</strong> Two things. First, it walks every CSV row and checks the image actually exists on disk — building a verified list of (image_path, label) pairs. Second, it builds the character vocabulary: every unique character that appears in any label becomes a numbered token.</p>
+  <p><strong>Why 109 characters:</strong> Devanagari has base consonants, vowels, vowel signs (matras), conjuncts, and digits. Each is a separate token. The model outputs a probability distribution over all 109 tokens at each timestep.</p>
+  <div class="callout">
+    <div class="callout-title">The vocabulary is the model's entire output space</div>
+    <p>The model can never predict a character it hasn't seen in the vocabulary. If your Nepali fine-tuning data introduces new characters not present in the Hindi training set, they won't decode correctly — they'll map to the closest known character. This is why building the vocab carefully matters.</p>
+  </div>
+
+  <h2>Cell 8 — Dataset and DataLoader</h2>
+  <pre><code>class DevanagariDataset(Dataset):
+    def __getitem__(self, idx):
+        img = Image.open(self.pairs[idx][0]).convert('RGB')
+        img = self.transform(img)      # resize + normalize
+        label = encode(self.pairs[idx][1])  # text → int list
+        return img, label, len(label)
+
+train_loader = DataLoader(train_ds, batch_size=64, shuffle=True)</code><span class="code-label">python</span></pre>
+  <p><strong>What it does:</strong> Wraps your raw (path, label) pairs in PyTorch's data loading machinery. The DataLoader handles batching, shuffling, and parallel loading.</p>
+  <p><strong>The transform pipeline on each image:</strong></p>
+  <ol>
+    <li>Convert to RGB (3 channels, even for grayscale — VGG16 expects 3)</li>
+    <li>Resize to exactly 32×128</li>
+    <li>Convert pixel values to a tensor (0–255 becomes 0–1)</li>
+    <li>Normalise with ImageNet mean/std — subtracts the average colour of the ImageNet dataset. This is required because VGG16 was trained expecting normalised inputs.</li>
+  </ol>
+  <p><strong>Why shuffle=True for train but not val:</strong> Training benefits from random order — seeing examples in different sequences each epoch prevents the model from memorising patterns that are really just artifacts of ordering. Validation just needs consistent results for comparison.</p>
+
+  <h2>Cell 9 — Preview images</h2>
+  <p><strong>What it does:</strong> Displays 10 random training images with their labels using matplotlib. A visual sanity check — if you see actual handwritten Devanagari words, the pipeline is working.</p>
+  <p><strong>The glyph warnings you saw:</strong> matplotlib's default font doesn't include all Devanagari codepoints, so the title text above each image showed boxes instead of characters. The images themselves were fine — only the rendered text labels had the display problem.</p>
+
+  <h2>Cell 10 — The CRNN model</h2>
+  <p>This is the most important cell. See the "What CNNs actually do" and "Sequences & RNNs" sections for the deep explanation. The short version:</p>
+  <pre><code>class CRNN(nn.Module):
+    def forward(self, x):
+        f = self.cnn(x)        # image → feature map
+        f = self.pool(f)       # collapse height → 1
+        f = f.permute(2,0,1)   # reshape to sequence
+        r, _ = self.rnn(f)     # read sequence
+        out = self.fc(r)       # predict characters
+        return log_softmax(out)</code><span class="code-label">python</span></pre>
+
+  <h2>Cell 11 — CTC decoder and metrics</h2>
+  <p>Sets up the greedy decoder (collapse repeated chars, strip blanks) and the metrics functions. See "CTC loss explained" for why this works.</p>
+
+  <h2>Cell 12 — Optimizer and scheduler</h2>
+  <pre><code>optimizer = optim.Adam(
+    filter(lambda p: p.requires_grad, model.parameters()), lr=LR
+)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=3, factor=0.5)</code><span class="code-label">python</span></pre>
+  <p><strong>Adam optimizer:</strong> Updates model weights after each batch. Adam is "adaptive" — it adjusts how big the update step is per parameter based on the history of previous gradients. It's the standard first choice in most deep learning work.</p>
+  <p><strong>ReduceLROnPlateau scheduler:</strong> Monitors val_loss. If it doesn't improve for 3 consecutive epochs (<code>patience=3</code>), it halves the learning rate (<code>factor=0.5</code>). You saw this fire at epoch 20, dropping LR from 1e-5 to 5e-6 — and it worked: epochs 20 and 21 both hit new accuracy records.</p>
+
+  <h2>Cell 13 — Training loop</h2>
+  <p>The cell that runs everything. Each epoch: iterate over all training batches → forward pass → compute CTC loss → backward pass (compute gradients) → update weights → evaluate on val set → save checkpoint if best. This runs 40 times.</p>
+</div>
+
+<!-- PIPELINE -->
+<div class="page" id="page-pipeline">
+  <h1>How data flows through your model</h1>
+  <p>Follow a single image of the word <em>बहादुर</em> from pixel on disk to predicted text.</p>
+
+  <h2>Step 1 — Image on disk</h2>
+  <p>A JPEG file. 483×293 pixels (or 824×294, or whatever the scanner produced). Three colour channels (RGB). Raw pixel values 0–255.</p>
+
+  <h2>Step 2 — Transform</h2>
+  <p>Your DataLoader's transform pipeline forces every image to the same shape:</p>
+  <pre><code>Resize → (32 height, 128 width)
+ToTensor → pixel values 0.0–1.0
+Normalize → subtract ImageNet mean, divide by std</code><span class="code-label">transform</span></pre>
+  <p>Result: a tensor of shape <code>[3, 32, 128]</code> — 3 channels × 32 pixels tall × 128 pixels wide.</p>
+
+  <h2>Step 3 — Batch</h2>
+  <p>The DataLoader stacks 64 of these together. Shape becomes <code>[64, 3, 32, 128]</code> — 64 images in one batch.</p>
+
+  <h2>Step 4 — VGG16 CNN</h2>
+  <p>The frozen VGG16 convolutional layers process the batch. Think of it as a very sophisticated edge and pattern detector. The image passes through 13 layers of convolution and pooling, each detecting increasingly abstract patterns — edges → strokes → curves → character parts.</p>
+  <p>Output shape: <code>[64, 512, 1, 4]</code> — 64 images, 512 feature channels, 1 pixel tall (pooled down), 4 positions wide.</p>
+  <div class="callout amber">
+    <div class="callout-title">Why does width become 4?</div>
+    <p>VGG16 has a specific architecture that downsamples the spatial dimensions. A 128-wide input shrinks to 4 wide after passing through all the pooling layers. Each of those 4 "columns" corresponds to roughly a quarter of the original image width — a rough spatial position.</p>
+  </div>
+
+  <h2>Step 5 — AdaptiveAvgPool and reshape</h2>
+  <pre><code>f = self.pool(f)       # [64, 512, 1, 4]
+f = f.squeeze(2)       # [64, 512, 4]
+f = f.permute(2,0,1)   # [4, 64, 512]</code><span class="code-label">python</span></pre>
+  <p>This reshape is the conceptual key to how CRNN works. We go from "a 2D image" to "a sequence of 4 feature vectors, each describing one horizontal slice of the image." The RNN will read these left to right, just like you read text.</p>
+
+  <h2>Step 6 — BiLSTM</h2>
+  <p>The sequence of 4 feature vectors gets fed into a bidirectional LSTM. It reads the sequence forward (left → right) and backward (right → left) simultaneously, capturing context from both directions for each position.</p>
+  <p>Output: <code>[4, 64, 512]</code> — 4 timesteps, 64 images, 512 features (256 forward + 256 backward).</p>
+
+  <h2>Step 7 — FC layer → character probabilities</h2>
+  <pre><code>out = self.fc(r)   # [4, 64, 110]  (109 chars + 1 blank token)</code><span class="code-label">python</span></pre>
+  <p>At each of the 4 timesteps, the model outputs a probability distribution over all 110 tokens (109 characters + 1 special blank token used by CTC).</p>
+
+  <h2>Step 8 — CTC decoding</h2>
+  <p>The greedy decoder takes those 4 timesteps of probability distributions, picks the highest-probability token at each step, collapses repeated characters, and strips blanks. The result is a string of predicted characters.</p>
+  <p>See the CTC section for a full worked example of why this is necessary.</p>
+</div>
+
+<!-- TRAINING LOGS -->
+<div class="page" id="page-training">
+  <h1>Reading your training logs</h1>
+  <p>What each number actually means, and how to know if training is healthy.</p>
+
+  <h2>The numbers explained</h2>
+
+  <h3>train_loss</h3>
+  <p>The average CTC loss across all training batches in the epoch. This measures how wrong the model's predictions were on the data it was trained on. You want this to go down every epoch — and it has, consistently: 1.175 → 0.039 over 21 epochs.</p>
+  <div class="callout red">
+    <div class="callout-title">Warning sign</div>
+    <p>If train_loss goes to NaN (Not a Number), stop immediately. This means the gradients exploded — learning rate too high, or a numerical instability. Never let NaN training continue.</p>
+  </div>
+
+  <h3>val_loss</h3>
+  <p>The same CTC loss, but measured on the validation set — data the model has <em>never</em> seen during training. This is a more honest measure of how well the model actually learned, vs. just memorised.</p>
+  <div class="callout amber">
+    <div class="callout-title">The critical gap to watch</div>
+    <p>In your run, train_loss (0.039) is much lower than val_loss (0.42). The model performs better on training data than unseen data — this is normal and expected. It becomes a problem when val_loss stops improving or goes back up while train_loss keeps falling. That's called <em>overfitting</em>.</p>
+  </div>
+
+  <h3>val_acc</h3>
+  <p><strong>Exact string match.</strong> The percentage of validation words where the model predicted every single character correctly. It's a strict metric — <em>बहादुर</em> predicted as <em>बहदुर</em> (one character off) counts as wrong.</p>
+  <p>Your current best: 57.88% at epoch 21. Over half of all validation words are now predicted perfectly.</p>
+
+  <h3>val_cer (Character Error Rate)</h3>
+  <p>A softer metric than val_acc. For each predicted/true pair, it computes the edit distance (how many insertions, deletions, or substitutions are needed to turn the prediction into the correct answer) and divides by the length of the correct answer.</p>
+  <ul>
+    <li>CER = 0.0 → perfect prediction</li>
+    <li>CER = 0.379 → on average, the prediction needs edits on ~38% of characters</li>
+    <li>CER = 1.0 → the model is as wrong as if it predicted nothing</li>
+    <li>CER &gt; 1.0 → actively worse than outputting blank (early epochs)</li>
+  </ul>
+  <p>CER is more informative than val_acc at the early stages because it captures <em>how close</em> the model is, not just right/wrong.</p>
+
+  <h3>lr (learning rate)</h3>
+  <p>You saw the LR drop at epoch 20 from 1e-5 to 5e-6. This was ReduceLROnPlateau detecting that val_loss had plateaued for 3 epochs (epochs 16, 17, 18 all had similar val_loss). Halving the LR lets the optimizer take smaller, more precise steps — often unlocking further improvement. It worked: epoch 20 and 21 both hit new accuracy records.</p>
+
+  <h2>Your training at a glance</h2>
+  <table class="epoch-table">
+    <tr><th>Epoch</th><th>val_acc</th><th>val_cer</th><th>train_loss</th><th>Signal</th></tr>
+    <tr><td>1</td><td>16.78%</td><td>0.731</td><td>1.175</td><td><span class="tag tag-purple">Starting</span></td></tr>
+    <tr><td>5</td><td>38.50%</td><td>0.526</td><td>0.306</td><td><span class="tag tag-amber">Learning fast</span></td></tr>
+    <tr><td>12</td><td>51.31%</td><td>0.426</td><td>0.109</td><td><span class="tag tag-green">Majority correct</span></td></tr>
+    <tr><td>16</td><td>55.24%</td><td>0.394</td><td>0.076</td><td><span class="tag tag-green">Best before LR drop</span></td></tr>
+    <tr><td>20</td><td>55.71%</td><td>0.392</td><td>0.055</td><td><span class="tag tag-amber">LR reduced here</span></td></tr>
+    <tr><td>21</td><td>57.88%</td><td>0.379</td><td>0.039</td><td><span class="tag tag-green">New best</span></td></tr>
+  </table>
+
+  <div class="callout green">
+    <div class="callout-title">What to expect from epochs 22–40</div>
+    <p>The LR is now 5e-6 (half of before). Gains will be smaller per epoch, but should continue. Expect to land somewhere around 65–72% val_acc by epoch 40. Whether to run another LR reduction cycle after that depends on if val_loss plateaus again.</p>
+  </div>
+
+  <h2>The persistent failure: मॉ</h2>
+  <p>You've probably noticed <em>मॉ</em> almost never gets predicted correctly — it consistently comes out as <em>माँ</em>, <em>याँ</em>, or similar. This isn't a bug. Short words with rare vowel combinations are the hardest cases for any OCR system:</p>
+  <ul>
+    <li>Only 2 characters — less context for the RNN to work with</li>
+    <li>The ॉ vowel sign is rare in the training data</li>
+    <li>Visually similar to माँ and others</li>
+  </ul>
+  <p>Your NLP post-processing layer (rapidfuzz) will help with this at inference time — even if OCR misreads it, fuzzy matching against a known word list can recover the correct token.</p>
+</div>
+
+<!-- CNN -->
+<div class="page" id="page-cnn">
+  <h1>What CNNs actually do</h1>
+  <p>A Convolutional Neural Network (CNN) is a system that learns to detect visual patterns — at multiple scales, automatically, from examples.</p>
+
+  <h2>The core idea: learned filters</h2>
+  <p>Imagine a small window (say, 3×3 pixels) that slides across an image. At each position, it multiplies each of the 9 pixels it covers by a weight, and sums them up. The result is one number — a "response" measuring how much this patch of image matches the pattern the filter is looking for.</p>
+  <p>A filter with weights that highlight vertical edges will produce a high response wherever it finds a vertical stroke. A different filter finds horizontal edges. Another finds curves. The CNN doesn't decide which filters to use — it learns the filter weights from the training data.</p>
+
+  <h2>Layers stack up</h2>
+  <p>One convolutional layer applies many filters (64 or 128 or 512) and produces a feature map — a stack of responses, one per filter, across the whole image. The next layer applies filters to those feature maps, detecting patterns-in-patterns. By the time you're 13 layers deep (like VGG16), the filters are detecting things like "curved stroke with a dot above" or "horizontal bar with downstroke."</p>
+
+  <h2>Pooling reduces size</h2>
+  <p>Between convolutional layers, pooling layers shrink the spatial dimensions. A 2×2 max-pool takes the highest value in each 2×2 block and discards the rest — halving width and height. This is why your 128×32 image becomes 4×1 by the end of VGG16.</p>
+
+  <h2>Why VGG16 specifically</h2>
+  <p>VGG16 (Visual Geometry Group, 16 layers) was trained on ImageNet — 1.2 million photographs of 1000 categories. It learned incredibly general visual features: edges, textures, shapes, curves. These transfer to handwritten character recognition because both tasks fundamentally require detecting strokes and curves.</p>
+  <div class="callout">
+    <div class="callout-title">The frozen layers decision</div>
+    <p>Your notebook freezes VGG16's 14.7M parameters and only trains the BiLSTM + FC (3.2M parameters). This works because VGG16 features are already good enough for the CNN part — and freezing makes training ~5× faster while reducing the risk of overfitting on your dataset.</p>
+  </div>
+
+  <h2>Where the magic disappears</h2>
+  <p>A CNN is literally just matrix multiplications and non-linear activation functions (ReLU: max(0, x)), applied in a specific spatial pattern. There is no understanding of what a character "is." The model finds pixel-level correlations that happen to align with what humans call characters. It has no concept that "ब" is a letter — it only knows that images with certain pixel patterns tend to have the label "ब" in the training data.</p>
+</div>
+
+<!-- RNN -->
+<div class="page" id="page-rnn">
+  <h1>Sequences and RNNs</h1>
+  <p>The second half of your CRNN model. Once the CNN turns an image into a sequence of feature vectors, the RNN reads that sequence to produce text.</p>
+
+  <h2>Why sequences at all?</h2>
+  <p>Text has order. The character at position 3 depends on what came before it. A plain fully-connected network that looks at all features at once misses this temporal structure. An RNN processes one element at a time, passing a "memory" (hidden state) from step to step — so what it's seen before influences what it predicts next.</p>
+
+  <h2>LSTM — the variant you're using</h2>
+  <p>Basic RNNs have a problem: they forget things over long sequences. The Long Short-Term Memory (LSTM) architecture fixes this with learned gates — mechanisms that control what to keep in memory, what to forget, and what to output at each step.</p>
+  <p>An LSTM cell has three gates:</p>
+  <ul>
+    <li><strong>Forget gate:</strong> how much of the previous memory to discard</li>
+    <li><strong>Input gate:</strong> what new information to add to memory</li>
+    <li><strong>Output gate:</strong> what to read from memory as output</li>
+  </ul>
+  <p>These are all learned from data. The LSTM figures out on its own what patterns are worth remembering across long sequences.</p>
+
+  <h2>Bidirectional — why read both ways?</h2>
+  <p>A standard LSTM reads left to right. A <em>bidirectional</em> LSTM runs two LSTMs simultaneously — one left-to-right and one right-to-left — and concatenates their outputs. At each position, the network has context from both directions.</p>
+  <p>For text recognition this matters: knowing what comes after a character helps disambiguate what it is. The end of the word helps confirm the reading of the beginning.</p>
+
+  <h2>In your model specifically</h2>
+  <pre><code>self.rnn = nn.LSTM(
+    input_size = 512,      # features from VGG16
+    hidden_size = 256,     # memory size per direction
+    num_layers = 2,        # two stacked LSTM layers
+    bidirectional = True,  # forward + backward
+    dropout = 0.3          # randomly disable 30% of neurons during training
+)</code><span class="code-label">python</span></pre>
+  <p>Two stacked LSTM layers means the output of the first LSTM becomes the input to the second — deeper, more abstract sequence modelling. Dropout randomly zeroes 30% of activations during training to prevent overfitting.</p>
+</div>
+
+<!-- CTC -->
+<div class="page" id="page-ctc">
+  <h1>CTC loss explained</h1>
+  <p>CTC (Connectionist Temporal Classification) is probably the hardest concept in your notebook. Here it is made concrete.</p>
+
+  <h2>The core problem</h2>
+  <p>Your model processes a 128-pixel-wide image and produces, after all the CNN and RNN processing, a sequence of 4 outputs. The label for that image might be <em>जोख</em> — 3 characters. How do you train a model that produces 4 outputs to match a 3-character target? And what if the image is <em>बहादुर</em> (6 characters) — also produces 4 outputs? How does 4 outputs encode 6 characters?</p>
+  <p>This is the alignment problem: the number of model output timesteps doesn't match the number of characters in the label, and you don't know which output timestep corresponds to which character.</p>
+
+  <h2>CTC's solution: the blank token</h2>
+  <p>CTC introduces a special blank token (let's call it <code>_</code>). The model can now output blanks between real characters, allowing different length sequences to encode the same label:</p>
+  <pre><code>ज ो ख _    →  collapses to:  जोख
+ज _ ो ख    →  collapses to:  जोख
+_ ज ो ख    →  collapses to:  जोख</code><span class="code-label">decoding</span></pre>
+  <p>The decoding rules are:</p>
+  <ol>
+    <li>Merge consecutive repeated characters (जज → ज, but ज_ज → जज since the blank separates two separate जs)</li>
+    <li>Remove all blank tokens</li>
+  </ol>
+
+  <h2>What CTC loss actually computes</h2>
+  <p>For a given image, there are many valid output sequences that all decode to the correct label. CTC loss sums the probability of all valid alignments — and trains the model to maximise this total probability. You don't need to know <em>which</em> alignment is correct, only that the correct label should be producible.</p>
+  <p>As training proceeds, the model learns to assign high probability to the sequences of tokens that, after collapsing, produce the correct words. It figures out the alignment entirely on its own from the image-label pairs.</p>
+
+  <h2>The greedy decoder in Cell 11</h2>
+  <pre><code>def decode(output):
+    argmax = output.argmax(dim=2)     # pick highest-prob token each step
+    result = []
+    for sequence in argmax:
+        chars = []
+        prev = None
+        for token in sequence:
+            if token != blank and token != prev:
+                chars.append(idx2char[token.item()])
+            prev = token
+        result.append(''.join(chars))
+    return result</code><span class="code-label">python</span></pre>
+  <p>This is CTC greedy decoding: at each timestep, pick the most probable token, then collapse repeats and strip blanks. It's not the theoretically optimal decoder (beam search is better), but it's fast and works well enough for evaluation during training.</p>
+
+  <h2>Why the loss can go above 1.0</h2>
+  <p>CTC loss is measured in nats (natural log units), not a percentage. A loss of 1.175 (your epoch 1) means the model assigns about e^-1.175 ≈ 31% probability to all correct alignments combined. A loss of 0.039 (epoch 21) means it assigns e^-0.039 ≈ 96% probability to the correct alignments. The loss is essentially measuring how surprised the model is by the correct answer.</p>
+</div>
+
+<!-- TRANSFER -->
+<div class="page" id="page-transfer">
+  <h1>Transfer learning</h1>
+  <p>The technique behind your model's fast learning — and why it started at 16.78% accuracy in epoch 1 instead of near 0%.</p>
+
+  <h2>The basic idea</h2>
+  <p>Training a deep neural network from scratch requires enormous amounts of data and compute. But most visual tasks share common low-level features: edges, curves, textures. Instead of re-learning these from scratch for every new task, you start with a model that already learned them on a large dataset, and adapt it to your specific task.</p>
+
+  <h2>What "pretrained" means</h2>
+  <p>VGG16 was trained on 1.2 million images spanning 1000 categories — cats, cars, furniture, animals. After that training, its convolutional filters encode extraordinarily general visual representations. These representations happen to be useful for detecting handwritten strokes too.</p>
+
+  <h2>Two strategies: freeze vs. fine-tune</h2>
+  <p><strong>Freeze (what your notebook does):</strong> Lock the pretrained CNN weights. Only the new layers on top (BiLSTM + FC) are trained. Fast, less data needed, works when the source and target domains are reasonably similar.</p>
+  <p><strong>Fine-tune:</strong> Unlock the pretrained weights and train the whole model, but at a much lower learning rate for the pretrained parts. Slower, needs more data, but can adapt the features more specifically to the new domain.</p>
+  <div class="callout">
+    <div class="callout-title">Why freeze makes sense for Phase 1</div>
+    <p>You're training on Hindi handwriting (source domain) to build a base, then fine-tuning on synthetic Nepali words (target domain). Freezing VGG16 in Phase 1 makes training faster and prevents the large pretrained network from overfitting your 69k dataset. In Phase 2, you might consider unfreezing the last few VGG layers for Nepali-specific adaptation — though given your time constraint, keeping it frozen is also fine.</p>
+  </div>
+
+  <h2>Why this explains your epoch 1 results</h2>
+  <p>Your 20k-subsample run got 0.06% accuracy at epoch 1. Your full-dataset run (same model, more data) got 16.78%. The difference isn't the model architecture — it's data volume. More training examples → more diverse character combinations → faster convergence → better generalisation from the very first epoch. Transfer learning gave you the feature extraction for free; data volume determines how fast the BiLSTM learns to use those features for your specific task.</p>
+</div>
+
+<!-- INDUSTRY -->
+<div class="page" id="page-industry">
+  <h1>How industry builds this</h1>
+  <p>The honest picture of what real ML engineering looks like — not the textbook version.</p>
+
+  <h2>The full pipeline, realistically</h2>
+  <div class="pipeline">
+    <div class="pipe-step">Problem definition</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">Data collection</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">Data cleaning</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">Baseline model</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">Iteration</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">Deployment</div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">Monitoring</div>
+  </div>
+
+  <h3>Problem definition (often 20% of total time)</h3>
+  <p>What exactly needs to be predicted? What counts as success? What's the cost of a wrong answer? A land registry OCR system where a wrong address corrupts legal records needs a different accuracy bar than a casual text transcription app. In industry, ML engineers spend significant time negotiating these requirements before writing any code.</p>
+
+  <h3>Data collection and cleaning (often 40–60% of total time)</h3>
+  <p>This is the unglamorous majority of real ML work. Finding data, cleaning it, labelling it, auditing it, handling edge cases, dealing with imbalanced classes. You hit this directly: path resolution issues, the রুকুম (পূর্বী ভাগ) parenthetical edge case, short words with rare vowel combinations.</p>
+  <p>In production, companies often spend months and significant budget just on data labelling — paying human annotators to produce the ground-truth labels that make training possible.</p>
+
+  <h3>Baseline model</h3>
+  <p>Before building anything complex, good ML engineers establish a baseline — the simplest thing that could possibly work. Sometimes the baseline is already good enough. Your CRNN+CTC is actually a well-established, proven architecture for text recognition — it's not bleeding-edge, which is a feature not a bug for a real use case. Proven architectures are more predictable and easier to debug than novel ones.</p>
+
+  <h3>Iteration</h3>
+  <p>Training once and deploying is rare. Real development involves repeated cycles of: train → evaluate → identify failure modes → fix (more data, different architecture, better preprocessing) → retrain. Your two-phase approach (Hindi pretrain → Nepali fine-tune) is an example of this.</p>
+
+  <h3>Deployment</h3>
+  <p>Getting a model from a Jupyter notebook to a production API involves: serialising the model weights (your <code>.pth</code> files), building an inference server, handling batching for throughput, versioning, rollback capability, and usually containerisation (Docker).</p>
+
+  <h3>Monitoring</h3>
+  <p>Models degrade in production. Handwriting styles change, new document formats appear, edge cases accumulate. Production ML systems track accuracy metrics on live data and alert when performance degrades below thresholds.</p>
+
+  <h2>What ML engineers actually spend time on</h2>
+  <p>Based on real surveys of ML practitioners:</p>
+  <ul>
+    <li>~40% — data work (collection, cleaning, labelling, augmentation)</li>
+    <li>~20% — debugging (shape mismatches, path errors, CUDA issues — exactly what you've been doing)</li>
+    <li>~20% — infrastructure (setting up environments, managing compute, deployment)</li>
+    <li>~15% — experimentation (trying different architectures, hyperparameters)</li>
+    <li>~5% — the "AI magic" that movies show</li>
+  </ul>
+
+  <h2>Your project in industry terms</h2>
+  <p>What you're building maps directly to a real product category: <strong>Intelligent Document Processing (IDP)</strong>. Companies like ABBYY, AWS Textract, Google Document AI, and dozens of startups build exactly this. The typical production stack for Nepali/regional language OCR:</p>
+  <ul>
+    <li>Document ingestion → image preprocessing (deskew, denoise, binarize)</li>
+    <li>Layout analysis → separate printed template from handwritten fill</li>
+    <li>Field detection → identify which regions contain names, dates, addresses</li>
+    <li>OCR inference → your CRNN model per field</li>
+    <li>Post-processing → fuzzy match against dictionaries (your rapidfuzz layer)</li>
+    <li>Confidence scoring → flag low-confidence predictions for human review</li>
+    <li>Output → structured JSON fed to downstream systems</li>
+  </ul>
+  <p>You're building every layer of this stack.</p>
+</div>
+
+<!-- RESOURCES -->
+<div class="page" id="page-resources">
+  <h1>What to learn next</h1>
+  <p>Curated — not a dump of everything. Ordered by what builds on what.</p>
+
+  <h2>To understand what you just built</h2>
+  <p><strong>CTC loss:</strong> Search "Connectionist Temporal Classification explained" on YouTube. The Distill.pub article on the subject is the best written explanation that exists — it has interactive diagrams. Alternatively: "CTC loss intuition" by Awni Hannun on Medium.</p>
+  <p><strong>LSTM internals:</strong> Chris Olah's blog post "Understanding LSTMs" (colah.github.io) is the canonical reference — it's been read by millions of ML practitioners. Read this before any other LSTM resource.</p>
+  <p><strong>CNNs:</strong> The Stanford CS231n course notes on CNNs (cs231n.github.io/convolutional-networks/) are free and outstanding. Chapter 2–4 is all you need.</p>
+
+  <h2>To go deeper on this project</h2>
+  <p><strong>The original CRNN paper:</strong> "An End-to-End Trainable Neural Network for Image-based Sequence Recognition" by Shi et al. (2015). Available on arXiv. 8 pages. Directly describes what you built.</p>
+  <p><strong>Tesseract OCR:</strong> The open-source OCR system that predates deep learning. Understanding it shows you what the non-deep-learning approach looks like, and why DL won.</p>
+  <p><strong>Devanagari-specific research:</strong> Search Google Scholar for "Devanagari handwriting recognition deep learning" — there are several good papers from IIT labs specifically on this problem domain.</p>
+
+  <h2>To understand ML more broadly</h2>
+  <p><strong>Fast.ai "Practical Deep Learning for Coders":</strong> Free course at fast.ai. Starts with working code and builds intuition from there — the opposite of most courses that start with math. Given how you learn (build first, understand second), this will resonate.</p>
+  <p><strong>Andrej Karpathy's Neural Networks: Zero to Hero:</strong> YouTube playlist. He builds everything from scratch — a character-level language model, then backpropagation, then an attention mechanism. Watching someone implement these from a blank file makes the concepts concrete in a way that papers don't.</p>
+  <p><strong>3Blue1Brown "Neural Networks" series:</strong> YouTube. The visual explanation of backpropagation is the best anywhere. Watch this once and gradient descent stops being a black box.</p>
+
+  <h2>For your career direction (AI Engineer)</h2>
+  <p><strong>LangChain / LlamaIndex docs:</strong> AI engineers today largely build systems that orchestrate AI models, not train them. These frameworks are the standard tooling for that work.</p>
+  <p><strong>"Building LLM Applications" by chip Huyen:</strong> Practical guide to deploying AI systems. Available as a blog series on huyenchip.com.</p>
+  <p><strong>MLOps fundamentals:</strong> Search "MLflow tutorial" and "Docker for ML engineers." These are the infrastructure skills that separate engineers who can train models from engineers who can deploy them reliably.</p>
+
+  <h2>The most valuable thing you can do after this project</h2>
+  <p>Ship it. Get the inference pipeline running, build the Streamlit demo, and have something you can actually show and demo. A working system you understand end-to-end — even an imperfect one — is worth more for your learning and your career than a theoretically perfect system that never runs. You're almost there.</p>
+</div>
+
+</main>
+</div>
+
+<script>
+function show(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('visible');
+  document.getElementById('nav-' + page).classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,438 @@
+
+<h2 class="sr-only">AI dependency hierarchy — top-down collapsible tree from Artificial Intelligence root to BLAS/LAPACK leaf nodes</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#tree-root{padding:1rem 0 2rem;overflow-x:auto;min-height:200px}
+.tree-node{position:relative}
+.node-row{display:flex;align-items:flex-start;gap:0}
+.node-connector{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:20px}
+.node-vline{width:1px;background:var(--border-strong);flex:1;min-height:8px}
+.node-hline{width:20px;height:1px;background:var(--border-strong);margin-top:20px;flex-shrink:0}
+.node-children{padding-left:0;margin-left:20px;border-left:1px solid var(--border-strong)}
+.node-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:0.5px solid;cursor:pointer;font-size:12px;font-weight:500;white-space:nowrap;user-select:none;transition:opacity .15s;margin:4px 0;position:relative}
+.node-pill:hover{opacity:.75}
+.node-pill .expand-icon{font-size:10px;opacity:.7;font-style:normal}
+.depth-0{background:var(--bg-accent);border-color:var(--border-accent);color:var(--text-accent)}
+.depth-1{background:#f0eeff;border-color:#b5aff0;color:#3c3489}
+.depth-2{background:#f0eeff;border-color:#b5aff0;color:#3c3489}
+.depth-3{background:#e8faf3;border-color:#5dcaa5;color:#085041}
+.depth-4{background:#e8faf3;border-color:#5dcaa5;color:#085041}
+.depth-5{background:#e1f5ee;border-color:#1d9e75;color:#04342c}
+.depth-6{background:#d6f0e6;border-color:#0f6e56;color:#04342c}
+@media(prefers-color-scheme:dark){
+.depth-0{background:var(--bg-accent);border-color:var(--border-accent);color:var(--text-accent)}
+.depth-1,.depth-2{background:#26215c;border-color:#534ab7;color:#cecbf6}
+.depth-3,.depth-4{background:#04342c;border-color:#1d9e75;color:#9fe1cb}
+.depth-5,.depth-6{background:#04342c;border-color:#0f6e56;color:#5dcaa5}
+}
+.node-children.collapsed{display:none}
+.modal-wrap{display:none;position:relative;margin-top:1.5rem;background:var(--surface-2);border:0.5px solid var(--border-strong);border-radius:12px;padding:20px 20px 16px}
+.modal-wrap.open{display:block}
+.modal-close{position:absolute;top:12px;right:14px;background:none;border:none;cursor:pointer;color:var(--text-secondary);font-size:18px;line-height:1;padding:2px 6px}
+.modal-badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 10px;border-radius:12px;margin-bottom:8px;font-family:var(--font-mono)}
+.modal-title{font-size:17px;font-weight:500;color:var(--text-primary);margin-bottom:6px}
+.modal-desc{font-size:13px;color:var(--text-secondary);line-height:1.65;margin-bottom:12px}
+.meta-label{font-size:10px;font-family:var(--font-mono);font-weight:500;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;margin-bottom:5px}
+.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.tag{font-size:11px;padding:2px 9px;border-radius:10px;border:0.5px solid var(--border);color:var(--text-secondary);background:var(--surface-1);font-family:var(--font-mono)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
+.leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary)}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+</style>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#378add"></div>L0–L2: Concepts</div>
+  <div class="leg"><div class="leg-dot" style="background:#1d9e75"></div>L3–L4: Domains &amp; architectures</div>
+  <div class="leg"><div class="leg-dot" style="background:#0f6e56"></div>L5–L6: Frameworks &amp; libraries</div>
+</div>
+<div id="tree-root"></div>
+
+<div class="modal-wrap" id="info-modal">
+  <button class="modal-close" onclick="closeModal()" aria-label="close">✕</button>
+  <div class="modal-badge" id="m-badge"></div>
+  <div class="modal-title" id="m-title"></div>
+  <div class="modal-desc" id="m-desc"></div>
+  <div id="m-depends-wrap">
+    <div class="meta-label">Depends on</div>
+    <div class="tag-row" id="m-depends"></div>
+  </div>
+  <div id="m-usedby-wrap">
+    <div class="meta-label">Used by / enables</div>
+    <div class="tag-row" id="m-usedby"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  label:"Artificial Intelligence", level:0,
+  desc:"The overarching field of creating systems that can perceive, reason, learn, and act with human-like intelligence. Every branch below is a sub-discipline or enabling technology of AI.",
+  dependsOn:[], usedBy:["All downstream fields"],
+  children:[
+    {label:"Machine Learning", level:1,
+     desc:"Systems that learn patterns from data rather than being explicitly programmed. Performance improves through experience over labeled or unlabeled datasets.",
+     dependsOn:["Statistics","Linear Algebra","Probability"],
+     usedBy:["Deep Learning","Classical ML","Reinforcement Learning"],
+     children:[
+       {label:"Classical ML", level:2,
+        desc:"Pre-deep-learning methods: regression, SVMs, decision trees, clustering, ensemble methods. Still dominant for tabular data, interpretability-critical domains, and low-data regimes.",
+        dependsOn:["Statistics","Optimization","Linear Algebra"],
+        usedBy:["Feature engineering","Baseline modeling","Industry pipelines"],
+        children:[
+          {label:"scikit-learn", level:5,
+           desc:"The gold-standard Python library for classical ML — regression, classification, clustering, dimensionality reduction, model selection, and preprocessing. Built entirely on NumPy and SciPy.",
+           dependsOn:["NumPy","SciPy","Python"],
+           usedBy:["Classical ML pipelines","Feature engineering","Baseline models"],
+           children:[
+             {label:"NumPy", level:6,
+              desc:"Foundational N-dimensional array library for scientific Python — fast array operations backed by C/Fortran. The ur-dependency of the entire Python AI stack.",
+              dependsOn:["C extensions","BLAS/LAPACK","Python C API"],
+              usedBy:["SciPy","scikit-learn","PyTorch","TensorFlow","OpenCV","librosa"],
+              children:[
+                {label:"BLAS / LAPACK", level:6,
+                 desc:"Basic Linear Algebra Subprograms and Linear Algebra PACKage — battle-tested Fortran/C matrix routines. The lowest-level numerical foundation under all scientific computing. Implementations: OpenBLAS, MKL, cuBLAS.",
+                 dependsOn:["CPU/GPU hardware","Fortran","C"],
+                 usedBy:["NumPy","SciPy","CUDA/cuBLAS","MATLAB","R","Julia"],
+                 children:[]}
+              ]},
+             {label:"SciPy", level:5,
+              desc:"Scientific computing built on NumPy — optimization, linear algebra solvers, signal processing, statistics, sparse matrix support. Essential dependency for classical ML.",
+              dependsOn:["NumPy","LAPACK/BLAS","Fortran routines"],
+              usedBy:["scikit-learn","Classical ML","Signal processing"],
+              children:[
+                {label:"NumPy", level:6,
+                 desc:"Foundational N-dimensional array library for scientific Python.",
+                 dependsOn:["C extensions","BLAS/LAPACK","Python C API"],
+                 usedBy:["SciPy","scikit-learn","PyTorch","TensorFlow"],
+                 children:[{label:"BLAS / LAPACK", level:6, desc:"Battle-tested Fortran/C matrix routines — the lowest numerical foundation of all scientific computing.",dependsOn:["CPU/GPU hardware","Fortran","C"],usedBy:["NumPy","SciPy","CUDA/cuBLAS"],children:[]}]}
+              ]}
+          ]},
+       {label:"Deep Learning", level:2,
+        desc:"Multi-layer neural networks that automatically learn hierarchical representations from raw data. Powers most modern breakthroughs in vision, language, audio, and beyond.",
+        dependsOn:["Neural networks","Backpropagation","Gradient descent","Linear Algebra"],
+        usedBy:["CV","NLP","Speech","Generative AI"],
+        children:[
+          {label:"Computer Vision", level:3,
+           desc:"Teaching machines to interpret visual data — classification, detection, segmentation, pose estimation, optical flow, depth estimation.",
+           dependsOn:["Deep Learning","Signal processing","Image formation"],
+           usedBy:["Self-driving cars","Medical imaging","Augmented reality"],
+           children:[
+             {label:"CNNs", level:4,
+              desc:"Convolutional Neural Networks — learned spatial filters extracting hierarchical image features. Foundation of AlexNet, ResNet, EfficientNet, and most classical CV pipelines.",
+              dependsOn:["Deep Learning","Convolution operation","Backpropagation"],
+              usedBy:["Image classification","Object detection","Medical imaging"],
+              children:[
+                {label:"PyTorch", level:5,
+                 desc:"Facebook's deep learning framework — eager-mode computation, intuitive debugging, vast ecosystem (torchvision, torchaudio, HuggingFace). Dominant in research.",
+                 dependsOn:["NumPy","CUDA/cuDNN","C++ libtorch"],
+                 usedBy:["CNNs","Transformers","Diffusion models","RL","Research"],
+                 children:[
+                   {label:"NumPy", level:6, desc:"Foundational N-dimensional array library for scientific Python.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF","scikit-learn"],children:[{label:"BLAS / LAPACK",level:6,desc:"Battle-tested Fortran/C matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","SciPy","CUDA/cuBLAS"],children:[]}]},
+                   {label:"CUDA / cuDNN", level:6, desc:"NVIDIA GPU programming APIs — cuDNN provides optimized DL primitives (conv, attention, BN). The hardware substrate enabling modern deep learning at scale.",dependsOn:["NVIDIA GPU hardware","C/C++"],usedBy:["PyTorch","TensorFlow","JAX","Any GPU training"],children:[{label:"BLAS / LAPACK",level:6,desc:"Battle-tested Fortran/C matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","SciPy","CUDA/cuBLAS"],children:[]}]}
+                 ]},
+                {label:"TensorFlow / Keras", level:5,
+                 desc:"Google's deep learning framework — static computation graph with XLA compilation. Keras is the high-level API. Dominant for production deployment (TFLite, TF Serving).",
+                 dependsOn:["NumPy","CUDA/cuDNN","C++ core"],
+                 usedBy:["Production deployment","Mobile inference","Google AI"],
+                 children:[
+                   {label:"NumPy", level:6, desc:"Foundational N-dimensional array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF","scikit-learn"],children:[{label:"BLAS / LAPACK",level:6,desc:"Battle-tested Fortran/C matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","SciPy"],children:[]}]},
+                   {label:"CUDA / cuDNN", level:6, desc:"NVIDIA GPU programming APIs enabling modern deep learning.",dependsOn:["NVIDIA GPU hardware","C/C++"],usedBy:["PyTorch","TensorFlow","JAX"],children:[{label:"BLAS / LAPACK",level:6,desc:"Battle-tested Fortran/C matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","CUDA/cuBLAS"],children:[]}]}
+                 ]}
+              ]},
+             {label:"Vision Transformers (ViT)", level:4,
+              desc:"Applying Transformer architecture to image patches — enabling unified vision-language models like CLIP, DALL-E, and SAM. State-of-the-art CV at scale.",
+              dependsOn:["Transformer architecture","Self-attention","Deep Learning"],
+              usedBy:["Image classification at scale","Multimodal models","Segmentation"],
+              children:[
+                {label:"PyTorch", level:5, desc:"Facebook's deep learning framework — dominant in research.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["CNNs","Transformers","Diffusion models"],children:[
+                  {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","SciPy"],children:[]}]},
+                  {label:"CUDA / cuDNN",level:6,desc:"NVIDIA GPU APIs.",dependsOn:["NVIDIA GPU hardware"],usedBy:["PyTorch","TensorFlow"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","CUDA/cuBLAS"],children:[]}]}
+                ]},
+                {label:"Hugging Face", level:5, desc:"De-facto hub for 500k+ pre-trained transformer models. Unified API for fine-tuning, inference, and sharing. Built on PyTorch and TensorFlow.",dependsOn:["PyTorch / TensorFlow","Tokenizers","Model hubs"],usedBy:["NLP apps","Fine-tuning","Zero-shot inference","RAG"],children:[
+                  {label:"PyTorch",level:5,desc:"Facebook's deep learning framework.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["Transformers","Diffusion","RL"],children:[
+                    {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","SciPy"],children:[]}]}
+                  ]}
+                ]}
+              ]},
+             {label:"OpenCV", level:4,
+              desc:"Open Source Computer Vision Library — 2500+ algorithms for classical and deep CV: image processing, feature detection, camera calibration, optical flow, and DNN inference.",
+              dependsOn:["Image processing theory","C++/Python","NumPy"],
+              usedBy:["Industrial inspection","Robotics perception","AR/VR"],
+              children:[
+                {label:"NumPy", level:6, desc:"Foundational N-dimensional array library — OpenCV's Python bindings depend on NumPy arrays for all image data.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF","scikit-learn","OpenCV"],children:[{label:"BLAS / LAPACK",level:6,desc:"Battle-tested Fortran/C matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","SciPy"],children:[]}]}
+              ]}
+           ]},
+          {label:"NLP", level:3,
+           desc:"Enabling machines to understand, generate, and manipulate human language — tokenization, parsing, translation, sentiment analysis, question answering, generation.",
+           dependsOn:["Deep Learning","Linguistics","Information theory"],
+           usedBy:["Chatbots","Search engines","Document processing"],
+           children:[
+             {label:"Transformer architecture", level:4,
+              desc:"'Attention Is All You Need' (2017) — self-attention over all token pairs in parallel. Foundation of BERT, GPT, LLaMA, and virtually every modern LLM.",
+              dependsOn:["Self-attention","Positional encoding","Residual connections"],
+              usedBy:["LLMs","Vision Transformers","Speech models","Multimodal AI"],
+              children:[
+                {label:"PyTorch", level:5, desc:"Facebook's deep learning framework — dominant in research.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["CNNs","Transformers","Diffusion models"],children:[
+                  {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","SciPy"],children:[]}]},
+                  {label:"CUDA / cuDNN",level:6,desc:"NVIDIA GPU APIs.",dependsOn:["NVIDIA GPU hardware"],usedBy:["PyTorch","TensorFlow"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","CUDA/cuBLAS"],children:[]}]}
+                ]},
+                {label:"Hugging Face", level:5, desc:"De-facto hub for 500k+ pre-trained transformer models.",dependsOn:["PyTorch / TensorFlow","Tokenizers"],usedBy:["NLP apps","Fine-tuning","Zero-shot inference"],children:[
+                  {label:"PyTorch",level:5,desc:"Facebook's deep learning framework.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["Transformers","Diffusion","RL"],children:[
+                    {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]}
+                  ]}
+                ]}
+              ]},
+             {label:"RNNs / LSTMs", level:4,
+              desc:"Recurrent architectures for sequential data — hidden state carries memory through time steps. LSTMs added gating for long-range dependencies. Now largely superseded by Transformers.",
+              dependsOn:["Backpropagation through time","Sequential modeling"],
+              usedBy:["Time series","Legacy NLP","On-device inference"],
+              children:[
+                {label:"PyTorch", level:5, desc:"Facebook's deep learning framework.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["CNNs","Transformers","RNNs"],children:[
+                  {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]},
+                  {label:"CUDA / cuDNN",level:6,desc:"NVIDIA GPU APIs.",dependsOn:["NVIDIA GPU hardware"],usedBy:["PyTorch","TensorFlow"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","CUDA/cuBLAS"],children:[]}]}
+                ]},
+                {label:"TensorFlow / Keras", level:5, desc:"Google's deep learning framework — dominant for production deployment.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["Production deployment","Mobile inference"],children:[
+                  {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]}
+                ]}
+              ]},
+             {label:"spaCy / NLTK", level:4,
+              desc:"NLP libraries for classical text processing. NLTK is research-oriented; spaCy is production-ready with fast tokenization, NER, and dependency parsing.",
+              dependsOn:["Linguistics","Statistical NLP","Python"],
+              usedBy:["Information extraction","Text preprocessing","Annotation pipelines"],
+              children:[
+                {label:"NumPy", level:6, desc:"spaCy relies on NumPy for matrix operations in its vector and model components.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["spaCy","scikit-learn","PyTorch"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]}
+              ]}
+           ]},
+          {label:"Generative AI", level:3,
+           desc:"Models that generate new data resembling their training distribution — images, text, audio, video, code. Encompasses diffusion models, GANs, VAEs, and large language models.",
+           dependsOn:["Deep Learning","Probabilistic modeling","Transformers"],
+           usedBy:["Image synthesis","LLMs","Music generation","Drug discovery"],
+           children:[
+             {label:"Diffusion models", level:4,
+              desc:"Learn to reverse a noise-addition process — iteratively denoising random noise into coherent outputs. Stable Diffusion, DALL-E 3, Sora, and most SOTA image/video models use this.",
+              dependsOn:["Score matching","Stochastic differential equations","UNet/Transformer backbone"],
+              usedBy:["Text-to-image","Video generation","Drug molecule design"],
+              children:[
+                {label:"PyTorch", level:5, desc:"Facebook's deep learning framework — primary training backend for all major diffusion models.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["Stable Diffusion","DiT","Video models"],children:[
+                  {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]},
+                  {label:"CUDA / cuDNN",level:6,desc:"NVIDIA GPU APIs enabling modern deep learning.",dependsOn:["NVIDIA GPU hardware"],usedBy:["PyTorch","TensorFlow"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","CUDA/cuBLAS"],children:[]}]}
+                ]},
+                {label:"Hugging Face", level:5, desc:"Hosts Stable Diffusion, ControlNet, and most open diffusion checkpoints. Diffusers library abstracts the sampling pipeline.",dependsOn:["PyTorch","Tokenizers"],usedBy:["Diffusion pipelines","Fine-tuning","Image generation APIs"],children:[
+                  {label:"PyTorch",level:5,desc:"Facebook's deep learning framework.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["Transformers","Diffusion","RL"],children:[
+                    {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]}
+                  ]}
+                ]}
+              ]},
+             {label:"GANs", level:4,
+              desc:"Generative Adversarial Networks — generator and discriminator trained in opposition. Pioneered realistic image synthesis (StyleGAN). Largely displaced by diffusion for images.",
+              dependsOn:["Adversarial training","Deep Learning","Minimax game theory"],
+              usedBy:["Image synthesis","Video generation","Data augmentation"],
+              children:[
+                {label:"PyTorch", level:5, desc:"Primary training framework for GANs and StyleGAN.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["GANs","VAEs","Diffusion"],children:[
+                  {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]},
+                  {label:"CUDA / cuDNN",level:6,desc:"NVIDIA GPU APIs.",dependsOn:["NVIDIA GPU hardware"],usedBy:["PyTorch","TensorFlow"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","CUDA/cuBLAS"],children:[]}]}
+                ]}
+              ]}
+           ]},
+          {label:"Speech / Audio", level:3,
+           desc:"Processing and generating spoken language and audio signals — ASR, TTS, speaker diarization, and audio classification.",
+           dependsOn:["Signal processing","Deep Learning","Spectral analysis"],
+           usedBy:["Voice assistants","Transcription services","Music AI"],
+           children:[
+             {label:"torchaudio / librosa", level:4,
+              desc:"Audio processing libraries: torchaudio for PyTorch-native pipelines; librosa for spectrograms, mel filterbanks, and analysis. Both used in ASR, TTS, and music AI.",
+              dependsOn:["Signal processing","Fourier transforms","PyTorch/NumPy"],
+              usedBy:["ASR systems","TTS pipelines","Music generation"],
+              children:[
+                {label:"PyTorch", level:5, desc:"Backend for torchaudio — GPU-accelerated audio processing and model training.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["torchaudio","ASR models","TTS"],children:[
+                  {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF","librosa"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]},
+                  {label:"CUDA / cuDNN",level:6,desc:"NVIDIA GPU APIs.",dependsOn:["NVIDIA GPU hardware"],usedBy:["PyTorch","TensorFlow"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","CUDA/cuBLAS"],children:[]}]}
+                ]},
+                {label:"NumPy", level:6, desc:"librosa uses NumPy arrays for all audio data — spectrograms, mel filterbanks, MFCC features.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["librosa","SciPy","torchaudio"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]}
+              ]}
+           ]}
+        ]},
+       {label:"Reinforcement Learning", level:2,
+        desc:"Agent learns a policy by interacting with an environment and receiving reward signals. Underpins game-playing agents (AlphaGo), robotics, and RLHF for language model alignment.",
+        dependsOn:["Markov Decision Processes","Dynamic programming","Policy gradients"],
+        usedBy:["Game AI","Robot control","RLHF / LLM alignment"],
+        children:[
+          {label:"Gymnasium", level:4,
+           desc:"Maintained fork of OpenAI Gym — standard API for RL environments: reset(), step(), render(). Includes CartPole, Atari, MuJoCo. Foundation for most RL research.",
+           dependsOn:["RL theory","Physics simulation","Python"],
+           usedBy:["RL algorithm development","Curriculum learning","Sim-to-real transfer"],
+           children:[
+             {label:"NumPy", level:6, desc:"Gymnasium observation and action spaces are NumPy arrays — all environment state is returned as ndarrays.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["Gymnasium","PyTorch","scikit-learn"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines foundation.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]}
+           ]},
+          {label:"RLlib / Ray", level:4,
+           desc:"Ray RLlib — scalable distributed reinforcement learning framework. Ray parallelizes Python across clusters; RLlib adds RL-specific algorithms, vectorized envs, and multi-agent support.",
+           dependsOn:["Distributed systems","Actor model","PyTorch/TF"],
+           usedBy:["Large-scale RL","Multi-agent training","Hyperparameter tuning"],
+           children:[
+             {label:"PyTorch", level:5, desc:"Primary DL backend for RLlib — GPU policy optimization and value function training.",dependsOn:["NumPy","CUDA/cuDNN"],usedBy:["RLlib","Policy gradient methods"],children:[
+               {label:"NumPy",level:6,desc:"Foundational array library.",dependsOn:["C extensions","BLAS/LAPACK"],usedBy:["PyTorch","TF"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy"],children:[]}]},
+               {label:"CUDA / cuDNN",level:6,desc:"NVIDIA GPU APIs.",dependsOn:["NVIDIA GPU hardware"],usedBy:["PyTorch","TensorFlow"],children:[{label:"BLAS / LAPACK",level:6,desc:"Matrix routines.",dependsOn:["CPU/GPU hardware"],usedBy:["NumPy","CUDA/cuBLAS"],children:[]}]}
+             ]}
+           ]}
+        ]}
+     ]},
+    {label:"Symbolic AI / Rule-based", level:1,
+     desc:"The original AI paradigm — encoding knowledge as explicit rules, facts, and logic. Expert systems, knowledge graphs, ontologies, and formal logic engines. Decision via deduction, not statistics.",
+     dependsOn:["Formal logic","Knowledge engineering"],
+     usedBy:["Expert systems","Semantic search","Hybrid neuro-symbolic AI"],
+     children:[
+       {label:"Knowledge Graphs", level:2,
+        desc:"Structured entity-relationship representations — backbone of semantic search, recommendation systems, and neuro-symbolic AI. Used in Google Search, Wikidata, enterprise knowledge bases.",
+        dependsOn:["Ontology design","RDF/SPARQL","Graph theory"],
+        usedBy:["Semantic search","RAG pipelines","Biomedical AI"],
+        children:[
+          {label:"RDFLib / SPARQL", level:4,
+           desc:"Python library for RDF graphs — the semantic web data model. Supports parsing, SPARQL queries, and reasoning over OWL ontologies.",
+           dependsOn:["Knowledge Graphs","RDF standard","Graph traversal"],
+           usedBy:["Semantic web apps","Ontology tools","Linked data"],
+           children:[]},
+          {label:"Neo4j / Graph DBs", level:4,
+           desc:"Graph databases storing entities as nodes and relationships as edges — fast traversal queries. Neo4j uses the Cypher query language. Powers recommendation engines and fraud detection.",
+           dependsOn:["Graph theory","Indexing","Knowledge Graphs"],
+           usedBy:["Recommendation engines","Fraud detection","Knowledge base systems"],
+           children:[]}
+        ]},
+       {label:"Expert Systems", level:2,
+        desc:"AI programs encoding domain knowledge as IF-THEN rules. The dominant AI paradigm in the 1980s. Still used in medical decision support, legal reasoning, and configuration systems.",
+        dependsOn:["Formal logic","Rule engines","Knowledge acquisition"],
+        usedBy:["Medical decision support","Configuration systems","Legal AI"],
+        children:[
+          {label:"Prolog / Logic engines", level:4,
+           desc:"Logic programming languages using first-order logic clauses and backtracking search. Modern successors include Answer Set Programming (ASP). Used in NLP parsing and theorem provers.",
+           dependsOn:["Formal logic","Unification","Backtracking search"],
+           usedBy:["Expert systems","Theorem provers","NLP parsing"],
+           children:[]}
+        ]}
+     ]},
+    {label:"Robotics & Control", level:1,
+     desc:"Combines AI with physical systems — perception, planning, and actuation. Draws from control theory, kinematics, and deep learning for perception and policy learning.",
+     dependsOn:["Control theory","Kinematics","Sensor fusion"],
+     usedBy:["Autonomous vehicles","Industrial automation","Surgical robotics"],
+     children:[
+       {label:"SLAM", level:2,
+        desc:"Simultaneous Localization and Mapping — building a map of an unknown environment while tracking the robot's position. Core to autonomous vehicles, drones, and AR tracking.",
+        dependsOn:["Sensor fusion","Probabilistic filtering","Computer vision"],
+        usedBy:["Self-driving cars","Drones","AR/VR tracking"],
+        children:[
+          {label:"ROS", level:4,
+           desc:"Robot Operating System — middleware providing message-passing, hardware abstraction, and tooling for complex robot software. De-facto standard in research robotics.",
+           dependsOn:["Robotics","SLAM","Motion planning","Linux","C++/Python"],
+           usedBy:["Robot arms","Autonomous vehicles","Drone navigation"],
+           children:[]}
+        ]},
+       {label:"Motion Planning", level:2,
+        desc:"Computing collision-free trajectories from start to goal — A*, RRT, model predictive control. Bridges perception and actuation in physical AI systems.",
+        dependsOn:["Graph search","Optimization","Kinematics"],
+        usedBy:["Industrial arms","Autonomous navigation","Drone path planning"],
+        children:[
+          {label:"ROS", level:4,
+           desc:"Robot Operating System — middleware and tooling for complex robot software. De-facto standard in research and production robotics.",
+           dependsOn:["Robotics","SLAM","Motion planning","Linux"],
+           usedBy:["Robot arms","Autonomous vehicles","Drone navigation"],
+           children:[]}
+        ]}
+     ]}
+  ]
+};
+
+const LEVEL_NAMES = ["Root","Paradigm","Sub-paradigm","Domain","Architecture","Framework","Library"];
+
+function renderNode(node, container, isRoot){
+  const wrapper = document.createElement('div');
+  wrapper.className = 'tree-node';
+
+  const row = document.createElement('div');
+  row.className = 'node-row';
+
+  if(!isRoot){
+    const hline = document.createElement('div');
+    hline.className = 'node-hline';
+    row.appendChild(hline);
+  }
+
+  const pill = document.createElement('div');
+  pill.className = `node-pill depth-${node.level}`;
+  pill.setAttribute('role','button');
+  pill.setAttribute('tabindex','0');
+  pill.setAttribute('title', node.label);
+
+  const labelSpan = document.createElement('span');
+  labelSpan.textContent = node.label;
+  pill.appendChild(labelSpan);
+
+  const hasChildren = node.children && node.children.length > 0;
+  let expandIcon = null;
+  if(hasChildren){
+    expandIcon = document.createElement('em');
+    expandIcon.className = 'expand-icon';
+    expandIcon.textContent = '▾';
+    pill.appendChild(expandIcon);
+  }
+  row.appendChild(pill);
+  wrapper.appendChild(row);
+
+  let childrenDiv = null;
+  let collapsed = false;
+
+  if(hasChildren){
+    childrenDiv = document.createElement('div');
+    childrenDiv.className = 'node-children';
+    node.children.forEach(child => renderNode(child, childrenDiv, false));
+    wrapper.appendChild(childrenDiv);
+
+    const toggle = () => {
+      collapsed = !collapsed;
+      childrenDiv.classList.toggle('collapsed', collapsed);
+      expandIcon.textContent = collapsed ? '▸' : '▾';
+    };
+    pill.addEventListener('click', toggle);
+    pill.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); }});
+  } else {
+    pill.addEventListener('click', () => openModal(node));
+    pill.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openModal(node); }});
+  }
+
+  container.appendChild(wrapper);
+}
+
+function openModal(node){
+  const BADGE_COLORS = {
+    0:'background:var(--bg-accent);color:var(--text-accent)',
+    1:'background:#f0eeff;color:#3c3489',2:'background:#f0eeff;color:#3c3489',
+    3:'background:#e8faf3;color:#085041',4:'background:#e8faf3;color:#085041',
+    5:'background:#e1f5ee;color:#04342c',6:'background:#d6f0e6;color:#04342c'
+  };
+  const badge = document.getElementById('m-badge');
+  badge.textContent = `L${node.level} · ${LEVEL_NAMES[node.level]||'Library'}`;
+  badge.style.cssText = BADGE_COLORS[node.level]||'';
+  document.getElementById('m-title').textContent = node.label;
+  document.getElementById('m-desc').textContent = node.desc||'';
+
+  const dw = document.getElementById('m-depends-wrap');
+  const dt = document.getElementById('m-depends');
+  if(node.dependsOn && node.dependsOn.length){
+    dw.style.display='block';
+    dt.innerHTML = node.dependsOn.map(t=>`<span class="tag">${t}</span>`).join('');
+  } else { dw.style.display='none'; }
+
+  const uw = document.getElementById('m-usedby-wrap');
+  const ut = document.getElementById('m-usedby');
+  if(node.usedBy && node.usedBy.length){
+    uw.style.display='block';
+    ut.innerHTML = node.usedBy.map(t=>`<span class="tag">${t}</span>`).join('');
+  } else { uw.style.display='none'; }
+
+  const modal = document.getElementById('info-modal');
+  modal.classList.add('open');
+  modal.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeModal(){ document.getElementById('info-modal').classList.remove('open'); }
+
+const root = document.getElementById('tree-root');
+renderNode(DATA, root, true);
+</script>

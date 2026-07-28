@@ -1,0 +1,673 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body, html { background: transparent; }
+  #tree-wrap { width: 100%; position: relative; font-family: 'Inter', sans-serif; }
+  #canvas-container { width: 100%; overflow: hidden; }
+  svg#radial { display: block; width: 100%; cursor: grab; user-select: none; }
+  svg#radial:active { cursor: grabbing; }
+  .ring-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; fill: var(--text-muted); letter-spacing: 0.08em; }
+
+  /* Modal */
+  #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; padding: 24px; }
+  #modal-overlay.open { display: flex; }
+  #modal-box { background: var(--surface-2); border: 0.5px solid var(--border-strong); border-radius: 16px; max-width: 520px; width: 100%; padding: 28px; position: relative; font-family: 'Inter', sans-serif; max-height: 80vh; overflow-y: auto; }
+  #modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: 20px; line-height: 1; padding: 4px; }
+  #modal-close:hover { color: var(--text-primary); }
+  #modal-level-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; }
+  #modal-title { font-size: 22px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+  #modal-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px; }
+  .modal-meta-section { margin-bottom: 12px; }
+  .modal-meta-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 500; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; }
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .modal-tag { font-size: 12px; padding: 3px 10px; border-radius: 20px; border: 0.5px solid var(--border); color: var(--text-secondary); background: var(--surface-1); font-family: 'JetBrains Mono', monospace; }
+
+  /* Controls */
+  #controls { display: flex; gap: 10px; align-items: center; padding: 10px 0 6px; flex-wrap: wrap; }
+  .ctrl-btn { font-size: 12px; font-family: 'JetBrains Mono', monospace; padding: 5px 12px; border-radius: 6px; border: 0.5px solid var(--border-strong); background: var(--surface-1); color: var(--text-secondary); cursor: pointer; transition: background 0.15s, color 0.15s; }
+  .ctrl-btn:hover { background: var(--surface-2); color: var(--text-primary); }
+  .ctrl-btn.active { background: var(--bg-accent); color: var(--text-accent); border-color: var(--border-accent); }
+  #legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 6px 0 4px; }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+</style>
+
+<div id="tree-wrap">
+  <div id="controls">
+    <button class="ctrl-btn" onclick="resetView()"><i class="ti ti-refresh" aria-hidden="true"></i> reset</button>
+    <button class="ctrl-btn" onclick="expandAll()">expand all</button>
+    <button class="ctrl-btn" onclick="collapseToRoot()">collapse all</button>
+    <span style="font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; margin-left:4px;">scroll/pinch to zoom · drag to pan · click to expand/info</span>
+  </div>
+  <div id="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#38BDF8"></div>L0–L2: Paradigms</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#A78BFA"></div>L3–L4: Domains & architectures</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#34D399"></div>L5–L6: Frameworks & libraries</div>
+  </div>
+  <div id="canvas-container">
+    <svg id="radial" viewBox="-700 -700 1400 1400" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div id="modal-box">
+    <button id="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+    <div id="modal-level-badge"></div>
+    <div id="modal-title"></div>
+    <div id="modal-desc"></div>
+    <div id="modal-depends" class="modal-meta-section" style="display:none">
+      <div class="modal-meta-label">Depends on</div>
+      <div class="modal-tags" id="modal-depends-tags"></div>
+    </div>
+    <div id="modal-usedby" class="modal-meta-section" style="display:none">
+      <div class="modal-meta-label">Used by / enables</div>
+      <div class="modal-tags" id="modal-usedby-tags"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const NODES = {
+  ai: {
+    id:'ai', label:'Artificial\nIntelligence', level:0,
+    desc:"The overarching field of creating systems that perform tasks requiring human-like intelligence — reasoning, learning, perception, language, and decision-making. Every branch below is a sub-discipline or enabling technology.",
+    dependsOn:[], usedBy:["All downstream fields"],
+    children:['ml','symbolic','robotics']
+  },
+  ml: {
+    id:'ml', label:'Machine\nLearning', level:1,
+    desc:"A sub-field of AI where systems learn patterns from data rather than being explicitly programmed. Algorithms improve their performance on tasks through experience, iterating over labeled or unlabeled datasets.",
+    dependsOn:["Statistics","Linear Algebra","Probability theory"],
+    usedBy:["Deep Learning","Reinforcement Learning","Classical ML"],
+    children:['classical_ml','dl','rl']
+  },
+  symbolic: {
+    id:'symbolic', label:'Symbolic AI /\nRule-based', level:1,
+    desc:"The original paradigm of AI — encoding human knowledge as explicit rules, facts, and logic. Includes expert systems, knowledge graphs, ontologies, and formal logic engines. Makes decisions through deduction rather than learned statistics.",
+    dependsOn:["Formal logic","Knowledge engineering"],
+    usedBy:["Expert systems","Ontology-based reasoning","Hybrid neuro-symbolic AI"],
+    children:['kg','expert_sys']
+  },
+  robotics: {
+    id:'robotics', label:'Robotics &\nControl', level:1,
+    desc:"Combines AI with physical systems — perception, planning, and actuation in the real world. Draws heavily from control theory, kinematics, and increasingly deep learning for perception and policy learning.",
+    dependsOn:["Control theory","Kinematics","Sensor fusion"],
+    usedBy:["Autonomous vehicles","Industrial automation","Surgical robotics"],
+    children:['slam','motion_plan']
+  },
+  classical_ml: {
+    id:'classical_ml', label:'Classical ML', level:2,
+    desc:"Machine learning before deep learning dominated — covering regression, decision trees, SVMs, clustering, and ensemble methods. Still widely used in tabular data, interpretability-critical domains, and low-data regimes.",
+    dependsOn:["Statistics","Optimization","Linear Algebra"],
+    usedBy:["Feature engineering","Scikit-learn","Baseline modeling"],
+    children:['sklearn','scipy']
+  },
+  dl: {
+    id:'dl', label:'Deep\nLearning', level:2,
+    desc:"A branch of ML using multi-layer neural networks (deep nets) that automatically learn hierarchical representations from raw data. Powers most modern breakthroughs in vision, language, and beyond.",
+    dependsOn:["Neural networks","Backpropagation","Gradient descent","Linear Algebra"],
+    usedBy:["CV","NLP","Speech","Generative AI"],
+    children:['cv','nlp','generative','speech']
+  },
+  rl: {
+    id:'rl', label:'Reinforcement\nLearning', level:2,
+    desc:"An ML paradigm where an agent learns a policy by interacting with an environment and receiving scalar reward signals. Underpins game-playing agents (AlphaGo), robotics control, and RLHF for language models.",
+    dependsOn:["Markov Decision Processes","Dynamic programming","Policy gradients"],
+    usedBy:["Game AI","Robot control","RLHF / LLM alignment"],
+    children:['gym','ray_rllib']
+  },
+  kg: {
+    id:'kg', label:'Knowledge\nGraphs', level:2,
+    desc:"Structured representations of entities and relationships — the backbone of semantic search, recommendation systems, and neuro-symbolic AI. Used in Google's search graph, Wikidata, and enterprise knowledge bases.",
+    dependsOn:["Ontology design","RDF/SPARQL","Graph theory"],
+    usedBy:["Semantic search","RAG pipelines","Biomedical AI"],
+    children:['rdflib','neo4j_kl']
+  },
+  expert_sys: {
+    id:'expert_sys', label:'Expert\nSystems', level:2,
+    desc:"AI programs encoding domain expert knowledge as IF-THEN rules. The dominant AI paradigm in the 1980s; still used in medical diagnosis support, legal reasoning, and configuration systems.",
+    dependsOn:["Formal logic","Rule engines","Knowledge acquisition"],
+    usedBy:["Medical decision support","Configuration systems"],
+    children:['prolog']
+  },
+  slam: {
+    id:'slam', label:'SLAM', level:2,
+    desc:"Simultaneous Localization and Mapping — the ability for a robot to build a map of an unknown environment while simultaneously tracking its own location within it. Core to autonomous vehicles and drones.",
+    dependsOn:["Sensor fusion","Probabilistic filtering","Computer vision"],
+    usedBy:["Self-driving cars","Drones","AR/VR tracking"],
+    children:['ros']
+  },
+  motion_plan: {
+    id:'motion_plan', label:'Motion\nPlanning', level:2,
+    desc:"Algorithms that compute collision-free trajectories for robots from start to goal — including A*, RRT, and model predictive control. Bridges perception and actuation.",
+    dependsOn:["Graph search","Optimization","Kinematics"],
+    usedBy:["Industrial arms","Autonomous navigation"],
+    children:['ros']
+  },
+  cv: {
+    id:'cv', label:'Computer\nVision', level:3,
+    desc:"Teaching machines to interpret and understand visual data — images and video. Tasks include classification, detection, segmentation, pose estimation, optical flow, and depth estimation.",
+    dependsOn:["Deep Learning","Signal processing","Image formation models"],
+    usedBy:["Self-driving cars","Medical imaging","Augmented reality"],
+    children:['cnn','vit','opencv_l']
+  },
+  nlp: {
+    id:'nlp', label:'Natural Language\nProcessing', level:3,
+    desc:"Enabling machines to understand, generate, and manipulate human language. Covers tokenization, parsing, machine translation, sentiment analysis, question answering, and generation.",
+    dependsOn:["Deep Learning","Linguistics","Information theory"],
+    usedBy:["Chatbots","Search engines","Document processing"],
+    children:['transformers_arch','rnn_lstm','spacy_nltk']
+  },
+  generative: {
+    id:'generative', label:'Generative\nAI', level:3,
+    desc:"Models that learn to generate new data resembling their training distribution — images, text, audio, video, code. Encompasses diffusion models, GANs, VAEs, and large language models.",
+    dependsOn:["Deep Learning","Probabilistic modeling","Transformers"],
+    usedBy:["Image synthesis","LLMs","Music generation","Drug discovery"],
+    children:['diffusion','gans','vaes']
+  },
+  speech: {
+    id:'speech', label:'Speech &\nAudio', level:3,
+    desc:"Processing and generating spoken language and audio signals. Covers automatic speech recognition (ASR), text-to-speech (TTS), speaker diarization, and audio classification.",
+    dependsOn:["Signal processing","Deep Learning","Spectral analysis"],
+    usedBy:["Voice assistants","Transcription services","Hearing aids"],
+    children:['torchaudio']
+  },
+  gym: {
+    id:'gym', label:'Gym /\nEnvironments', level:3,
+    desc:"Simulation environments for RL training — providing state observations, actions, and reward signals. OpenAI Gym (now Gymnasium) standardized the environment API for the RL research community.",
+    dependsOn:["Reinforcement Learning","Physics simulation"],
+    usedBy:["RL algorithm training","Curriculum learning"],
+    children:['gymnasium']
+  },
+  ray_rllib: {
+    id:'ray_rllib', label:'RLlib /\nDistributed RL', level:3,
+    desc:"Frameworks for scalable, distributed reinforcement learning — parallelizing environment rollouts and policy updates across many workers. Ray RLlib is the dominant library for production RL.",
+    dependsOn:["Reinforcement Learning","Distributed computing","PyTorch"],
+    usedBy:["Large-scale RL","Multi-agent training"],
+    children:['ray']
+  },
+  prolog: {
+    id:'prolog', label:'Prolog /\nLogic Engines', level:3,
+    desc:"Logic programming languages and inference engines used to implement expert systems and symbolic reasoning. Prolog uses first-order logic clauses; modern successors include Answer Set Programming (ASP).",
+    dependsOn:["Formal logic","Unification","Backtracking search"],
+    usedBy:["Expert systems","Theorem provers","NLP parsing"],
+    children:[]
+  },
+  rdflib: {
+    id:'rdflib', label:'RDFLib /\nSPARQL', level:3,
+    desc:"Python library for working with RDF graphs — the standard data model for semantic web knowledge graphs. Supports parsing, querying (SPARQL), and reasoning over ontologies like OWL.",
+    dependsOn:["Knowledge Graphs","RDF standard","Graph traversal"],
+    usedBy:["Semantic web apps","Ontology tools","Linked data"],
+    children:[]
+  },
+  neo4j_kl: {
+    id:'neo4j_kl', label:'Neo4j /\nGraph DBs', level:3,
+    desc:"Graph database systems that natively store entities as nodes and relationships as edges — enabling fast traversal queries impossible in relational DBs. Neo4j uses the Cypher query language.",
+    dependsOn:["Graph theory","Indexing","Knowledge Graphs"],
+    usedBy:["Recommendation engines","Fraud detection","Knowledge base systems"],
+    children:[]
+  },
+  ros: {
+    id:'ros', label:'ROS', level:3,
+    desc:"Robot Operating System — a middleware framework providing message-passing, hardware abstraction, and tool libraries for building complex robot software. The de-facto standard in research robotics.",
+    dependsOn:["Robotics","SLAM","Motion planning","Linux","C++/Python"],
+    usedBy:["Robot arms","Autonomous vehicles","Drone navigation"],
+    children:[]
+  },
+  cnn: {
+    id:'cnn', label:'CNNs', level:4,
+    desc:"Convolutional Neural Networks — architectures using learned spatial filters to extract hierarchical features from images. Revolutionized CV with LeNet, AlexNet, VGG, ResNet, and EfficientNet.",
+    dependsOn:["Deep Learning","Convolution operation","Backpropagation"],
+    usedBy:["Image classification","Object detection","Medical imaging"],
+    children:['pytorch','tensorflow']
+  },
+  vit: {
+    id:'vit', label:'Vision\nTransformers', level:4,
+    desc:"ViT — applying the Transformer architecture (originally from NLP) to image patches. Achieved state-of-the-art CV results at scale, enabling unified vision-language models like CLIP and DALL-E.",
+    dependsOn:["Transformer architecture","Self-attention","Deep Learning"],
+    usedBy:["Image classification at scale","Multimodal models","Segmentation"],
+    children:['pytorch','huggingface']
+  },
+  opencv_l: {
+    id:'opencv_l', label:'OpenCV', level:4,
+    desc:"Open Source Computer Vision Library — 2500+ optimized algorithms for classical and deep CV: image processing, feature detection, camera calibration, optical flow, and DNN inference.",
+    dependsOn:["Image processing theory","C++/Python","NumPy"],
+    usedBy:["Industrial inspection","Robotics perception","AR/VR"],
+    children:['numpy']
+  },
+  transformers_arch: {
+    id:'transformers_arch', label:'Transformer\nArchitecture', level:4,
+    desc:"The 'Attention Is All You Need' architecture (2017) — using self-attention to model relationships between all token pairs in parallel. Foundation of BERT, GPT, LLaMA, and virtually all modern LLMs.",
+    dependsOn:["Self-attention mechanism","Positional encoding","Residual connections"],
+    usedBy:["LLMs","Vision Transformers","Speech models","Multimodal AI"],
+    children:['pytorch','huggingface']
+  },
+  rnn_lstm: {
+    id:'rnn_lstm', label:'RNNs /\nLSTMs', level:4,
+    desc:"Recurrent architectures for sequential data — processing tokens one at a time with a hidden state carrying memory. LSTMs added gating to handle long-range dependencies. Largely superseded by Transformers but still used in time-series and edge inference.",
+    dependsOn:["Backpropagation through time","Sequential modeling"],
+    usedBy:["Time series","Legacy NLP models","On-device inference"],
+    children:['pytorch','tensorflow']
+  },
+  spacy_nltk: {
+    id:'spacy_nltk', label:'spaCy / NLTK', level:4,
+    desc:"NLP libraries for classical and hybrid text processing. NLTK is research-oriented (tokenization, parsing, corpora). spaCy is production-ready (fast tokenization, NER, dependency parsing, pre-trained pipelines).",
+    dependsOn:["Linguistics","Statistical NLP","Python"],
+    usedBy:["Information extraction","Text preprocessing","Annotation pipelines"],
+    children:['numpy']
+  },
+  diffusion: {
+    id:'diffusion', label:'Diffusion\nModels', level:4,
+    desc:"Generative models that learn to reverse a noise-addition process — iteratively denoising random noise into coherent images, audio, or video. Stable Diffusion, DALL-E 3, Sora, and most SOTA image/video models use this architecture.",
+    dependsOn:["Score matching","Stochastic differential equations","UNet/Transformer backbone"],
+    usedBy:["Text-to-image","Video generation","Drug molecule design"],
+    children:['pytorch','huggingface']
+  },
+  gans: {
+    id:'gans', label:'GANs', level:4,
+    desc:"Generative Adversarial Networks — a generator and discriminator trained in opposition. Pioneered realistic image synthesis (StyleGAN), super-resolution, and domain transfer. Largely displaced by diffusion models for images but still used in video and medical imaging.",
+    dependsOn:["Adversarial training","Deep Learning","Minimax game theory"],
+    usedBy:["Image synthesis","Video generation","Data augmentation"],
+    children:['pytorch','tensorflow']
+  },
+  vaes: {
+    id:'vaes', label:'VAEs', level:4,
+    desc:"Variational Autoencoders — learn a structured latent space by encoding inputs to distributions rather than points. Used for generation, compression, and as the latent backbone in latent diffusion models (Stable Diffusion uses a VAE).",
+    dependsOn:["Variational inference","KL divergence","Encoder-decoder architecture"],
+    usedBy:["Latent diffusion","Anomaly detection","Drug discovery"],
+    children:['pytorch']
+  },
+  torchaudio: {
+    id:'torchaudio', label:'torchaudio /\nlibrosa', level:4,
+    desc:"Audio processing libraries built on PyTorch (torchaudio) and NumPy (librosa). Provide spectrograms, mel filterbanks, audio augmentation, and pre-trained speech/audio models for ASR, TTS, and music analysis.",
+    dependsOn:["Signal processing","Fourier transforms","PyTorch/NumPy"],
+    usedBy:["ASR systems","TTS pipelines","Music AI"],
+    children:['pytorch','numpy']
+  },
+  gymnasium: {
+    id:'gymnasium', label:'Gymnasium', level:4,
+    desc:"The maintained fork of OpenAI Gym — providing a standard API for RL environments: reset(), step(), render(). Includes CartPole, Atari, MuJoCo, and robotics environments. Foundation for most RL research.",
+    dependsOn:["RL theory","Physics simulation","Python"],
+    usedBy:["RL algorithm development","Curriculum learning","Sim-to-real transfer"],
+    children:['numpy']
+  },
+  ray: {
+    id:'ray', label:'Ray', level:4,
+    desc:"A distributed computing framework from UC Berkeley — enabling parallelization of arbitrary Python code across clusters. Ray's ecosystem includes RLlib (RL), Train (DL), Tune (hyperparameter search), and Serve (model deployment).",
+    dependsOn:["Distributed systems","Actor model","Python"],
+    usedBy:["Distributed RL","Hyperparameter tuning","Large-scale inference"],
+    children:['numpy']
+  },
+  pytorch: {
+    id:'pytorch', label:'PyTorch', level:5,
+    desc:"Facebook's deep learning framework — the dominant research and production framework. Define-by-run (eager mode) computation graph, intuitive debugging, and a vast ecosystem (torchvision, torchaudio, HuggingFace). Used in most cutting-edge research papers.",
+    dependsOn:["NumPy","CUDA/cuDNN","C++ libtorch","Python"],
+    usedBy:["CNNs","Transformers","Diffusion models","RL","GANs","Research"],
+    children:['numpy','cuda']
+  },
+  tensorflow: {
+    id:'tensorflow', label:'TensorFlow /\nKeras', level:5,
+    desc:"Google's deep learning framework — define-and-run (static graph) with XLA compilation. Keras provides a high-level API on top. Dominant in production deployment (TFLite, TF Serving) and Google Cloud AI.",
+    dependsOn:["NumPy","CUDA/cuDNN","C++ core","Python"],
+    usedBy:["Production deployment","Mobile inference","Google-ecosystem models"],
+    children:['numpy','cuda']
+  },
+  huggingface: {
+    id:'huggingface', label:'Hugging Face\nTransformers', level:5,
+    desc:"The de-facto hub for pre-trained transformer models — 500k+ models for NLP, CV, audio, and multimodal tasks. Provides a unified API for fine-tuning, inference, and model sharing. Built on top of PyTorch and TensorFlow.",
+    dependsOn:["PyTorch / TensorFlow","Tokenizers","Model hubs"],
+    usedBy:["NLP applications","Fine-tuning pipelines","Zero-shot inference","RAG"],
+    children:['pytorch','numpy']
+  },
+  sklearn: {
+    id:'sklearn', label:'scikit-learn', level:5,
+    desc:"The gold standard library for classical machine learning in Python — covering regression, classification, clustering, dimensionality reduction, model selection, and preprocessing. Built entirely on NumPy and SciPy.",
+    dependsOn:["NumPy","SciPy","Python"],
+    usedBy:["Classical ML pipelines","Feature engineering","Baseline models"],
+    children:['numpy','scipy']
+  },
+  scipy: {
+    id:'scipy', label:'SciPy', level:5,
+    desc:"Scientific computing library built on NumPy — providing optimization routines, linear algebra solvers, signal processing, statistics, and sparse matrix support. An essential dependency for classical ML and scientific Python.",
+    dependsOn:["NumPy","LAPACK/BLAS","Fortran routines"],
+    usedBy:["scikit-learn","Classical ML","Signal processing","Scientific simulation"],
+    children:['numpy']
+  },
+  numpy: {
+    id:'numpy', label:'NumPy', level:6,
+    desc:"The foundational N-dimensional array library for scientific Python — providing fast array operations backed by C and Fortran routines. Virtually every ML/data library depends on NumPy directly or indirectly. The ur-dependency of the Python AI stack.",
+    dependsOn:["C extensions","BLAS/LAPACK","Python C API"],
+    usedBy:["SciPy","scikit-learn","PyTorch","TensorFlow","OpenCV","spaCy","librosa","Gymnasium"],
+    children:['blas']
+  },
+  cuda: {
+    id:'cuda', label:'CUDA /\ncuDNN', level:6,
+    desc:"NVIDIA's Compute Unified Device Architecture — low-level GPU programming APIs. cuDNN provides optimized implementations of deep learning primitives (conv, attention, BN). The hardware substrate that makes modern deep learning computationally feasible.",
+    dependsOn:["GPU hardware (NVIDIA)","C/C++","Assembly-level optimization"],
+    usedBy:["PyTorch","TensorFlow","JAX","TensorRT","Any GPU-accelerated training"],
+    children:['blas']
+  },
+  blas: {
+    id:'blas', label:'BLAS /\nLAPACK', level:6,
+    desc:"Basic Linear Algebra Subprograms and Linear Algebra PACKage — battle-tested Fortran/C routines for matrix multiplication, decomposition, and linear solvers. The lowest-level numerical foundation under NumPy, CUDA, and all scientific computing. Implementations include OpenBLAS, MKL, and cuBLAS.",
+    dependsOn:["Hardware (CPU/GPU)","Fortran","C"],
+    usedBy:["NumPy","SciPy","CUDA/cuBLAS","MATLAB","R","Julia"],
+    children:[]
+  },
+  jax: {
+    id:'jax', label:'JAX', level:5,
+    desc:"Google's functional array computing library — NumPy-compatible with JIT compilation (XLA), automatic differentiation, and vectorization (vmap). Preferred for research requiring performance at scale: large-scale Transformers, physics simulations, RL.",
+    dependsOn:["XLA compiler","NumPy API","Functional programming"],
+    usedBy:["Flax / NNX models","Gemini training","RL research","Scientific ML"],
+    children:['numpy','cuda']
+  },
+};
+
+const LEVEL_COLORS = {
+  0: '#38BDF8', 1: '#38BDF8', 2: '#38BDF8',
+  3: '#A78BFA', 4: '#A78BFA',
+  5: '#34D399', 6: '#34D399'
+};
+const LEVEL_BADGE_BG = {
+  0:'#0C4A6E', 1:'#0C4A6E', 2:'#0C4A6E',
+  3:'#3B0764', 4:'#3B0764',
+  5:'#064E3B', 6:'#064E3B'
+};
+
+let collapsed = new Set();
+let svgEl, transformState = {scale:1, panX:0, panY:0};
+
+function buildTree() {
+  const svg = document.getElementById('radial');
+  svgEl = svg;
+  renderTree();
+  setupPanZoom(svg);
+}
+
+function getVisibleNodes() {
+  const visible = new Set();
+  function walk(id) {
+    const node = NODES[id];
+    if (!node) return;
+    visible.add(id);
+    if (!collapsed.has(id) && node.children) {
+      node.children.forEach(cid => { if (NODES[cid]) walk(cid); });
+    }
+  }
+  walk('ai');
+  return visible;
+}
+
+const RING_RADII = [0, 130, 255, 375, 490, 600, 660];
+const NODE_R = [28, 22, 20, 18, 16, 15, 13];
+
+function getAngleMap() {
+  const visible = getVisibleNodes();
+  const levelNodes = {};
+  for (const id of visible) {
+    const l = NODES[id].level;
+    if (!levelNodes[l]) levelNodes[l] = [];
+    levelNodes[l].push(id);
+  }
+  const angles = {};
+  angles['ai'] = 0;
+  [1,2,3,4,5,6].forEach(l => {
+    if (!levelNodes[l]) return;
+    const n = levelNodes[l].length;
+    levelNodes[l].forEach((id, i) => {
+      angles[id] = (2 * Math.PI * i / n) - Math.PI / 2;
+    });
+  });
+  return {angles, visible};
+}
+
+function polar(r, a) { return [r * Math.cos(a), r * Math.sin(a)]; }
+
+function renderTree() {
+  const svg = document.getElementById('radial');
+  svg.innerHTML = '';
+  const {angles, visible} = getAngleMap();
+
+  const ringGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+  ringGroup.setAttribute('opacity','0.12');
+  [130,255,375,490,600,660].forEach((r,i) => {
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx','0'); c.setAttribute('cy','0');
+    c.setAttribute('r', r);
+    c.setAttribute('fill','none');
+    c.setAttribute('stroke', i < 3 ? '#38BDF8' : i < 5 ? '#A78BFA' : '#34D399');
+    c.setAttribute('stroke-width','0.5');
+    c.setAttribute('stroke-dasharray','3 4');
+    ringGroup.appendChild(c);
+  });
+  svg.appendChild(ringGroup);
+
+  const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+  for (const id of visible) {
+    const node = NODES[id];
+    if (!node.children) continue;
+    const [px, py] = id === 'ai' ? [0,0] : polar(RING_RADII[node.level], angles[id]);
+    node.children.forEach(cid => {
+      if (!visible.has(cid)) return;
+      const child = NODES[cid];
+      const [cx, cy] = polar(RING_RADII[child.level], angles[cid]);
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      const mx = (px + cx) / 2 * 0.6;
+      const my = (py + cy) / 2 * 0.6;
+      const d = `M${px},${py} Q${mx},${my} ${cx},${cy}`;
+      path.setAttribute('d', d);
+      path.setAttribute('fill','none');
+      const pc = LEVEL_COLORS[node.level];
+      const cc = LEVEL_COLORS[child.level];
+      const gid = `g_${id}_${cid}`;
+      const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+      const grad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+      grad.setAttribute('id', gid);
+      grad.setAttribute('gradientUnits','userSpaceOnUse');
+      grad.setAttribute('x1', px); grad.setAttribute('y1', py);
+      grad.setAttribute('x2', cx); grad.setAttribute('y2', cy);
+      const s1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+      s1.setAttribute('offset','0%'); s1.setAttribute('stop-color', pc); s1.setAttribute('stop-opacity','0.6');
+      const s2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+      s2.setAttribute('offset','100%'); s2.setAttribute('stop-color', cc); s2.setAttribute('stop-opacity','0.6');
+      grad.appendChild(s1); grad.appendChild(s2);
+      defs.appendChild(grad);
+      svg.insertBefore(defs, svg.firstChild);
+      path.setAttribute('stroke', `url(#${gid})`);
+      path.setAttribute('stroke-width','1');
+      edgeGroup.appendChild(path);
+    });
+  }
+  svg.appendChild(edgeGroup);
+
+  const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+  for (const id of visible) {
+    const node = NODES[id];
+    const r = RING_RADII[node.level];
+    const [x, y] = id === 'ai' ? [0,0] : polar(r, angles[id]);
+    const color = LEVEL_COLORS[node.level];
+    const nr = NODE_R[node.level];
+    const hasChildren = node.children && node.children.length > 0;
+    const isCollapsed = collapsed.has(id);
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('cursor','pointer');
+    g.setAttribute('transform',`translate(${x},${y})`);
+
+    if (node.level === 0) {
+      const glow = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      glow.setAttribute('cx','0'); glow.setAttribute('cy','0');
+      glow.setAttribute('r', nr + 10);
+      glow.setAttribute('fill', color); glow.setAttribute('opacity','0.12');
+      g.appendChild(glow);
+    }
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx','0'); circle.setAttribute('cy','0');
+    circle.setAttribute('r', nr);
+    circle.setAttribute('fill', '#0A0E1A');
+    circle.setAttribute('stroke', color);
+    circle.setAttribute('stroke-width', node.level === 0 ? '2' : '1.5');
+    circle.setAttribute('opacity', isCollapsed ? '0.5' : '1');
+    g.appendChild(circle);
+
+    if (hasChildren && !isCollapsed) {
+      const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx','0'); dot.setAttribute('cy','0');
+      dot.setAttribute('r', Math.max(3, nr * 0.25));
+      dot.setAttribute('fill', color); dot.setAttribute('opacity','0.7');
+      g.appendChild(dot);
+    }
+    if (hasChildren && isCollapsed) {
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x','0'); t.setAttribute('y','1');
+      t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','central');
+      t.setAttribute('font-size','10'); t.setAttribute('fill', color); t.setAttribute('opacity','0.9');
+      t.textContent = '+';
+      g.appendChild(t);
+    }
+
+    const lines = node.label.split('\n');
+    const offsetY = r < 150 ? nr + 14 : (x > 0 ? nr + 14 : -(nr + 14));
+    const anchor = r < 150 ? 'middle' : (x > 20 ? 'start' : x < -20 ? 'end' : 'middle');
+    const lx = r < 150 ? 0 : (x > 20 ? nr + 4 : x < -20 ? -(nr + 4) : 0);
+    const startY = r < 150 ? offsetY : (lines.length > 1 ? -7 : 0);
+
+    lines.forEach((line, i) => {
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', r < 150 ? 0 : lx);
+      t.setAttribute('y', r < 150 ? (offsetY + i * 13) : (startY + i * 13));
+      t.setAttribute('text-anchor', anchor);
+      t.setAttribute('dominant-baseline','central');
+      t.setAttribute('font-family',"'JetBrains Mono', monospace");
+      t.setAttribute('font-size', node.level <= 1 ? '10' : '8.5');
+      t.setAttribute('fill', color);
+      t.setAttribute('opacity', isCollapsed ? '0.5' : '0.9');
+      t.textContent = line;
+      g.appendChild(t);
+    });
+
+    g.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (hasChildren) {
+        if (collapsed.has(id)) collapsed.delete(id);
+        else collapsed.add(id);
+        renderTree();
+      } else {
+        openModal(id);
+      }
+    });
+    g.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      openModal(id);
+    });
+
+    g.addEventListener('mouseenter', () => {
+      circle.setAttribute('opacity','0.85');
+      circle.setAttribute('stroke-width', (node.level === 0 ? 2.5 : 2).toString());
+    });
+    g.addEventListener('mouseleave', () => {
+      circle.setAttribute('opacity', isCollapsed ? '0.5' : '1');
+      circle.setAttribute('stroke-width', (node.level === 0 ? 2 : 1.5).toString());
+    });
+
+    nodeGroup.appendChild(g);
+  }
+  svg.appendChild(nodeGroup);
+}
+
+function openModal(id) {
+  const node = NODES[id];
+  const color = LEVEL_COLORS[node.level];
+  const badgeBg = LEVEL_BADGE_BG[node.level];
+  const badge = document.getElementById('modal-level-badge');
+  badge.textContent = `L${node.level} · ${['Root','Paradigm','Sub-paradigm','Domain','Architecture','Framework','Library'][node.level] || 'Core'}`;
+  badge.style.background = badgeBg;
+  badge.style.color = color;
+  document.getElementById('modal-title').textContent = node.label.replace('\n',' ');
+  document.getElementById('modal-desc').textContent = node.desc;
+
+  const depSection = document.getElementById('modal-depends');
+  const depTags = document.getElementById('modal-depends-tags');
+  if (node.dependsOn && node.dependsOn.length) {
+    depSection.style.display = 'block';
+    depTags.innerHTML = node.dependsOn.map(t => `<span class="modal-tag">${t}</span>`).join('');
+  } else { depSection.style.display = 'none'; }
+
+  const useSection = document.getElementById('modal-usedby');
+  const useTags = document.getElementById('modal-usedby-tags');
+  if (node.usedBy && node.usedBy.length) {
+    useSection.style.display = 'block';
+    useTags.innerHTML = node.usedBy.map(t => `<span class="modal-tag">${t}</span>`).join('');
+  } else { useSection.style.display = 'none'; }
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+document.getElementById('modal-overlay').addEventListener('click', function(e){ if(e.target === this) closeModal(); });
+
+function resetView() {
+  transformState = {scale:1, panX:0, panY:0};
+  applyTransform();
+}
+function expandAll() { collapsed.clear(); renderTree(); }
+function collapseToRoot() {
+  Object.keys(NODES).forEach(id => { if(id !== 'ai') collapsed.add(id); });
+  collapsed.delete('ai');
+  renderTree();
+}
+
+function applyTransform() {
+  const inner = document.querySelector('#radial > g:last-of-type');
+  const allGs = document.querySelectorAll('#radial > g');
+  allGs.forEach(g => {
+    g.setAttribute('transform', `translate(${transformState.panX},${transformState.panY}) scale(${transformState.scale})`);
+  });
+}
+
+function setupPanZoom(svg) {
+  let isDragging = false, lastX = 0, lastY = 0;
+  svg.addEventListener('wheel', e => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.1 : 0.91;
+    transformState.scale = Math.min(4, Math.max(0.3, transformState.scale * factor));
+    applyTransformAll();
+  }, {passive:false});
+  svg.addEventListener('mousedown', e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    transformState.panX += dx; transformState.panY += dy;
+    lastX = e.clientX; lastY = e.clientY;
+    applyTransformAll();
+  });
+  window.addEventListener('mouseup', () => { isDragging = false; });
+
+  let lt1 = 0, lt2 = 0;
+  svg.addEventListener('touchstart', e => {
+    if(e.touches.length===2){lt1=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);}
+    else if(e.touches.length===1){lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;}
+  },{passive:true});
+  svg.addEventListener('touchmove', e => {
+    if(e.touches.length===2){
+      const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);
+      transformState.scale=Math.min(4,Math.max(0.3,transformState.scale*(d/lt1)));lt1=d;applyTransformAll();
+    } else if(e.touches.length===1){
+      const dx=e.touches[0].clientX-lastX,dy=e.touches[0].clientY-lastY;
+      transformState.panX+=dx;transformState.panY+=dy;
+      lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;applyTransformAll();
+    }
+  },{passive:true});
+}
+
+function applyTransformAll() {
+  const groups = document.querySelectorAll('#radial > g');
+  groups.forEach(g => {
+    g.setAttribute('transform', `translate(${transformState.panX},${transformState.panY}) scale(${transformState.scale})`);
+  });
+}
+
+buildTree();
+</script>
